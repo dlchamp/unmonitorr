@@ -1,6 +1,7 @@
 
 FROM python:3.12-slim
 ENV PIP_NO_CACHE_DIR=false
+ENV PYTHONPATH=/app
 
 WORKDIR /app
 
