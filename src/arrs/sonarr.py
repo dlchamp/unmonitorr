@@ -103,7 +103,7 @@ class SonarrClient(BaseArrClient):
         logger.debug("Series details: %s", series)
 
         url = self.base_url + f"/episode/monitor"
-        params: dict[str, str] = {"includeImages": "false"}
+        params: dict[str, Any] = {"includeImages": "false"}
 
         json: dict[str, Any] = {
             "episodeIds": [e.id for e in series.episodes],

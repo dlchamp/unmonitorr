@@ -1,6 +1,5 @@
 from typing import Any
 
-from types_ import Movie
 from . import BaseArrClient, HTTPException
 import log
 

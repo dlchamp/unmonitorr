@@ -30,7 +30,7 @@ class BaseArrClient:
         url: str,
         headers: dict[str, str],
         json: dict[str, Any] | None = None,
-        params: dict[str, str | int | float] | None = None,
+        params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
 
         logger.debug(
