@@ -10,7 +10,6 @@ Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optim
 - Listens for Radarr and Sonarr webhook notifications.
 - Automatically unmonitor episodes or series.
 - Optionally removes media from Radarr and Sonarr based on user configuration.
-- Fully asynchronous for optimal performance.
 
 ---
 
@@ -29,7 +28,6 @@ Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optim
 - Radarr and/or Sonarr configured to send webhooks to Unmonitorr.
 - aiohttp
 - Docker (optional, for containerized deployments).
-
 ---
 
 ## Installation
@@ -38,18 +36,18 @@ Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optim
 These options can be placed into a .env file if using Windows/Linux or you can pass them to your docker run
 command or as part of your docker compose if you'd rather do it that way.
 
-| KEY                       | Example Value         | Description                                                                                   |
-|---------------------------|-----------------------|-----------------------------------------------------------------------------------------------|
-| RADARR_URI                | http://localhost:7878 | Full URL or hostname with the port to your Radarr instance                                    |
-| RADARR_API_KEY            | abc123def456ghi789    | Your API Key (Settings > General > API Key)                                                   |
-| SONARR_URI                | http://localhost:7878 | Full URL or hostname with the port to your Sonarr instance                                    |
-| SONARR_API_KEY            | xyz987uvw654rst321    | Your API Key (Settings > General > API Key)                                                   |
-| HANDLE_EPISODES           | true                  | Automatically unmonitor episodes. Options: true, false                                        |
-| HANDLE_SERIES             | true                  | Automatically handle entire series. Options: true, false                                      |
-| EXCLUDE_SERIES            | true                  | Add series to import exclusion list. Only applies if REMOVE_MEDIA=true. Options: true, false  |
-| HANDLE_SERIES_ENDED_ONLY  | false                 | Only handle series if they are ended and complete. Options: true, false                       |
-| REMOVE_MEDIA              | false                 | Remove media from Radarr/Sonarr instead of just "Unmonitor". Options: true, false             |
-| LOG_LEVEL                 | info                  | Logging level. Options: debug, info, warning, error, critical                                 |
+| KEY                       | Example Value         | Default Value |  Description                                                                                  |
+|---------------------------|-----------------------|---------------|-----------------------------------------------------------------------------------------------|
+| RADARR_URI                | http://localhost:7878 |               | Full URL or hostname with the port to your Radarr instance                                    |
+| RADARR_API_KEY            | abc123def456ghi789    |               | Your API Key (Settings > General > API Key)                                                   |
+| SONARR_URI                | http://localhost:7878 |               | Full URL or hostname with the port to your Sonarr instance                                    |
+| SONARR_API_KEY            | xyz987uvw654rst321    |               | Your API Key (Settings > General > API Key)                                                   |
+| HANDLE_EPISODES           | true                  | true          | Automatically unmonitor episodes.<br>Options: true, false                                     |
+| HANDLE_SERIES             | false                 | false         | Automatically handle entire series. Options: true, false                                      |
+| EXCLUDE_SERIES            | true                  | true          | Add series to import exclusion list. Only applies if REMOVE_MEDIA=true. Options: true, false  |
+| HANDLE_SERIES_ENDED_ONLY  | true                  | true          | Only handle series if they are ended and complete. If false, only series that are complete are handled. Options: true, false |
+| REMOVE_MEDIA              | false                 | false         | Remove media from Radarr/Sonarr instead of just "Unmonitor".<br>Setting this to true only removes the media from the service. Files are left untouched on the file system. Options: true, false |
+| LOG_LEVEL                 | info                  | info          |Logging level. Options: debug, info, warning, error, critical                                  |
 
 ---
 
