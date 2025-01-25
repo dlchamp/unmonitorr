@@ -1,13 +1,20 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any, Final
+
 from aiohttp import web
+
+import log
 from arrs.radarr import RadarrClient
 from arrs.sonarr import SonarrClient
+from config import Config
 from types_ import Movie, Series
 
-from config import Config
-import log
-
 logger = log.get_logger(__name__)
+
+
+INVALID: Final[int] = 0
+VALID: Final[int] = 1
+TEST: Final[int] = 2
 
 
 class WebhookHandler:
@@ -59,12 +66,12 @@ class WebhookHandler:
         logger.debug("Received request payload: %s", payload)
 
         payload_status = self.validate_payload(payload)
-        if payload_status == 0:
+        if payload_status == INVALID:
             logger.warning("Received invalid payload: %s", headers)
             logger.debug("Payload content: %s", payload)
             return web.Response(status=400)
 
-        if payload_status == 2:
+        if payload_status == TEST:
             logger.info('Received "Test" payload')
             return web.Response()
 
@@ -101,12 +108,12 @@ class WebhookHandler:
 
         if not event_type:
             logger.warning("Payload missing 'eventType'.")
-            return 0
+            return INVALID
 
         if event_type == "Test":
-            return 2
+            return TEST
 
-        return 1
+        return VALID
 
     async def handle_movie(self, movie: Movie) -> None:
         """

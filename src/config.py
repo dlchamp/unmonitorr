@@ -6,6 +6,7 @@ else:
     dotenv.load_dotenv(override=True)
 
 import os
+from typing import Final
 
 
 class Config:
@@ -27,7 +28,7 @@ class Config:
     REMOVE_MEDIA: bool = os.getenv("REMOVE_MEDIA", "false").lower() == "true"
 
     @staticmethod
-    def validate():
+    def validate() -> None:
         """Validate required configuration values and raise errors if necessary."""
         missing: list[str] = []
         if not Config.RADARR_URI:
@@ -40,18 +41,18 @@ class Config:
             missing.append("SONARR_API_KEY")
 
         if missing:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+            raise ValueError("Missing required environment variables: %s", ", ".join(missing))
 
     @property
     def settings(self) -> str:
-        return f"Unmonitor Only" if not self.REMOVE_MEDIA else "Remove Item"
+        return "Unmonitor Only" if not self.REMOVE_MEDIA else "Remove Item"
 
 
 class LogConfig:
     # Logging configuration
     _LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info")
 
-    LOG_LEVEL_MAP: dict[str, int] = {
+    LOG_LEVEL_MAP: Final[dict[str, int]] = {
         "debug": 10,
         "info": 20,
         "warn": 30,

@@ -15,8 +15,7 @@ def to_snake_case(key: str) -> str:
     str
         The converted string in snake_case.
     """
-    converted = re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower()
-    return converted
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower()
 
 
 def to_camel_case(key: str) -> str:
@@ -33,5 +32,4 @@ def to_camel_case(key: str) -> str:
     str
         The converted string in camelCase.
     """
-    converted = re.sub(r"_([a-z])", lambda match: match.group(1).upper(), key)
-    return converted
+    return re.sub(r"_([a-z])", lambda match: match.group(1).upper(), key)

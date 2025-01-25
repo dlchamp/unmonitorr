@@ -1,12 +1,14 @@
 from typing import Any
+
 import aiohttp
+
 import log
 
 logger = log.get_logger(__name__)
 
 
 class HTTPException(Exception):
-    def __init__(self, response: aiohttp.ClientResponse, message: Any | None = None) -> None:
+    def __init__(self, response: aiohttp.ClientResponse, message: str | None = None) -> None:
         self.status = response.status
         self.url = str(response.url)
         self.method = response.method
@@ -42,17 +44,16 @@ class BaseArrClient:
             params,
         )
 
-        async with aiohttp.ClientSession() as session:
-            async with session.request(
-                method, url, headers=headers, params=params, json=json
-            ) as response:
-                logger.debug(
-                    "Response received: URL=%s, status=%s",
-                    response.url,
-                    response.status,
-                )
-                try:
-
-                    return await response.json()
-                except aiohttp.ContentTypeError as e:
-                    raise HTTPException(response, e) from None
+        async with (
+            aiohttp.ClientSession() as session,
+            session.request(method, url, headers=headers, params=params, json=json) as response,
+        ):
+            logger.debug(
+                "Response received: URL=%s, status=%s",
+                response.url,
+                response.status,
+            )
+            try:
+                return await response.json()
+            except aiohttp.ContentTypeError as e:
+                raise HTTPException(response, str(e)) from None

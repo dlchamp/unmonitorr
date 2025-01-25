@@ -1,7 +1,8 @@
 from typing import Any
 
-from . import BaseArrClient, HTTPException
 import log
+
+from . import BaseArrClient, HTTPException
 
 logger = log.get_logger(__name__)
 
@@ -53,7 +54,6 @@ class RadarrClient(BaseArrClient):
         try:
             response = await self.request("GET", url, headers=self.headers)
             logger.debug("Successfully fetched movie details: %s", response)
-            return response
         except HTTPException as e:
             logger.warning(
                 "Unexpected error fetching movie from Radarr: status=%s, reason=%s",
@@ -61,6 +61,8 @@ class RadarrClient(BaseArrClient):
                 e.reason,
             )
             return None
+        else:
+            return response
 
     async def delete_movie(self, id: int) -> None:
         """

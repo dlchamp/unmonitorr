@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Self
-import utils
 
+import utils
 
 ALLOWED_MOVIE_KEYS: set[str] = {
     "id",

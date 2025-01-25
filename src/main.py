@@ -1,9 +1,10 @@
+import asyncio
+
+from aiohttp import web
+
+import log
 from config import Config
 from server import init_web_application
-import asyncio
-from aiohttp import web
-import log
-
 
 logger = log.get_logger(__name__)
 
@@ -17,7 +18,7 @@ async def main() -> None:
 
     runner = web.AppRunner(app)
     await runner.setup()
-    host = "0.0.0.0"
+    host = "0.0.0.0"  # noqa: S104
     port = 8080
     site = web.TCPSite(runner, host=host, port=port)
     await site.start()

@@ -2,10 +2,9 @@ import logging
 import logging.handlers
 from pathlib import Path
 
-
 import coloredlogs  # type: ignore
-from config import LogConfig
 
+from config import LogConfig
 
 # setup logging format
 format_string: str = "%(asctime)s | %(module)s | %(levelname)s | %(message)s"

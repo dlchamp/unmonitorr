@@ -1,11 +1,15 @@
 from typing import Any
 
+import log
 from config import Config
 from types_ import Episode, Series
+
 from . import BaseArrClient, HTTPException
-import log
 
 logger = log.get_logger(__name__)
+
+
+COMPLETE_PERCENT = 100
 
 
 class SonarrClient(BaseArrClient):
@@ -49,12 +53,11 @@ class SonarrClient(BaseArrClient):
         """
         logger.debug("Fetching episode details for episode: %s", episode)
         method = "GET"
-        url = self.base_url + f"/episode/{episode.id}"
+        url = f"{self.base_url}/episode/{episode.id}"
 
         try:
             response = await self.request(method, url, headers=self.headers)
             logger.debug("Successfully fetched episode details: %s", response)
-            return response
         except HTTPException as e:
             logger.warning(
                 "Unexpected error fetching episode from Sonarr: status=%s, reason=%s",
@@ -62,6 +65,9 @@ class SonarrClient(BaseArrClient):
                 e.reason,
             )
             return None
+
+        else:
+            return response
 
     async def delete_series(self, id: int) -> None:
         """Delete a series from Sonarr.
@@ -72,7 +78,7 @@ class SonarrClient(BaseArrClient):
             The ID of the series to delete.
         """
         logger.info("Deleting series with ID: %s", id)
-        url = self.base_url + f"/series/{id}"
+        url = f"{self.base_url}/series/{id}"
 
         params: dict[str, Any] = {
             "deleteFiles": False,
@@ -100,7 +106,7 @@ class SonarrClient(BaseArrClient):
         logger.info("Attempting to unmonitor episodes for series: %s", series)
         logger.debug("Series details: %s", series)
 
-        url = self.base_url + f"/episode/monitor"
+        url = f"{self.base_url}/episode/monitor"
         params: dict[str, Any] = {"includeImages": "false"}
 
         json: dict[str, Any] = {
@@ -137,7 +143,6 @@ class SonarrClient(BaseArrClient):
         try:
             response = await self.request("GET", url, headers=self.headers)
             logger.debug("Successfully fetched series details: %s", response)
-            return response
         except HTTPException as e:
             logger.warning(
                 "Unexpected error fetching series from Sonarr: status=%s, reason=%s",
@@ -145,6 +150,9 @@ class SonarrClient(BaseArrClient):
                 e.reason,
             )
             return None
+
+        else:
+            return response
 
     async def unmonitor_series(self, data: dict[str, Any]) -> None:
         """Mark a series as unmonitored
@@ -201,4 +209,4 @@ class SonarrClient(BaseArrClient):
         """
         stats = series.get("statistics", {})
         logger.debug("Checking series completeness: %s", stats)
-        return stats.get("percentOfEpisodes", 0) == 100
+        return stats.get("percentOfEpisodes", 0) == 100  # noqa: PLR2004
