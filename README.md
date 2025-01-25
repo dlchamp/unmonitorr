@@ -80,7 +80,7 @@ command or as part of your docker compose if you'd rather do it that way.
     version: "3.9"
     services:
       unmonitorr:
-        build: .
+        image: ghcr.io/dlchamp/unmonitorr:latest
         container_name: unmonitorr
         ports:
           - "8080:8080"
