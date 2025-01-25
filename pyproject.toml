@@ -11,5 +11,84 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.1.0",
+    "pyright>=1.1.392.post0",
     "python-dotenv>=1.0.1",
 ]
+
+
+[tool.black]
+line-length=100
+target-version= ['py312']
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = [
+    "E203",
+    "E266",
+    "E501",
+    "D100",
+    "D101",
+    "D104",
+    "PGH003",
+    "G004",
+    "I001",
+    "TRY003",
+    "EM101",
+    "B008",
+    "PLR0913",
+    "RUF001",
+    "S311",
+    "PLR0912",
+]
+select = [
+    "B",
+    "C",
+    "E",
+    "F",
+    "W",
+    "B9",
+    "UP",
+    "YTT",
+    "ANN",
+    "S",
+    "BLE",
+    "FBT",
+    "C4",
+    "DTZ",
+    "T10",
+    "EM",
+    "ISC",
+    "G",
+    "PIE",
+    "T20",
+    "Q",
+    "RSE",
+    "RET",
+    "SIM",
+    "TCH",
+    "ARG",
+    "PGH",
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW",
+    "TRY",
+    "RUF"
+]
+exclude = [
+    ".git",
+    ".github",
+    "__pycache__",
+    ".venv",
+]
+
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 120
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

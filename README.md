@@ -2,7 +2,7 @@
 
 Unmonitorr is a lightweight tool designed to listen for incoming webhook notifications from Radarr and Sonarr, enabling automated management of media. Depending on your configuration, Unmonitorr can either unmonitor or remove media directly from Radarr and Sonarr.
 
-Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optimized for efficiency. 
+Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optimized for efficiency.
 
 ---
 
