@@ -22,15 +22,13 @@ class RadarrClient(BaseArrClient):
         API key for authenticating with the Radarr server.
     """
 
-    def __init__(self, proto: str, host: str, port: int, api_key: str) -> None:
+    def __init__(self, uri: str, api_key: str) -> None:
         super().__init__()
 
-        self.proto = proto
-        self.host = host
-        self.port = port
+        self.uri = uri
         self.api_key = api_key
 
-        self.base_url = f"{proto}://{host}:{port}/api/v3"
+        self.base_url = f"{uri}/api/v3"
         self.headers = {"X-API-Key": api_key, "Accept": "application/json"}
 
         logger.debug("Initialized RadarrClient with base_url: %s", self.base_url)

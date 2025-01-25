@@ -23,15 +23,11 @@ class WebhookHandler:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.radarr_api = RadarrClient(
-            config.RADARR_PROTOCOL,
-            config.RADARR_HOST,
-            config.RADARR_PORT,
+            config.RADARR_URI,
             config.RADARR_API_KEY,
         )
         self.sonarr_api = SonarrClient(
-            config.SONARR_PROTOCOL,
-            config.SONARR_HOST,
-            config.SONARR_PORT,
+            config.SONARR_URI,
             config.SONARR_API_KEY,
         )
         logger.debug("Initialized WebhookHandler")

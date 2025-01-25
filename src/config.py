@@ -10,15 +10,11 @@ import os
 
 class Config:
     # RADARR Configuration
-    RADARR_PROTOCOL: str = os.getenv("RADARR_PROTOCOL", "http")
-    RADARR_HOST: str = os.getenv("RADARR_HOST", "")
-    RADARR_PORT: int = int(os.getenv("RADARR_PORT", 7878))
+    RADARR_URI: str = os.getenv("RADARR_URI", "")
     RADARR_API_KEY: str = os.getenv("RADARR_API_KEY", "")
 
     # SONARR Configuration
-    SONARR_PROTOCOL: str = os.getenv("SONARR_PROTOCOL", "http")
-    SONARR_HOST: str = os.getenv("SONARR_HOST", "")
-    SONARR_PORT: int = int(os.getenv("SONARR_PORT", 8989))
+    SONARR_URI: str = os.getenv("SONARR_URI", "")
     SONARR_API_KEY: str = os.getenv("SONARR_API_KEY", "")
 
     # Sonarr-specific unmonitor settings
@@ -34,12 +30,12 @@ class Config:
     def validate():
         """Validate required configuration values and raise errors if necessary."""
         missing: list[str] = []
-        if not Config.RADARR_HOST:
-            missing.append("RADARR_HOST")
+        if not Config.RADARR_URI:
+            missing.append("RADARR_URI")
         if not Config.RADARR_API_KEY:
             missing.append("RADARR_API_KEY")
-        if not Config.SONARR_HOST:
-            missing.append("SONARR_HOST")
+        if not Config.SONARR_URI:
+            missing.append("SONARR_URI")
         if not Config.SONARR_API_KEY:
             missing.append("SONARR_API_KEY")
 
