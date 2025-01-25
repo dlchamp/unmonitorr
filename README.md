@@ -52,8 +52,9 @@ command or as part of your docker compose if you'd rather do it that way.
 ---
 
 ### Setting Up with Docker
+
 #### Using `docker run`
-1. Pull the image: `docker pull dlchamp/unmonitorr:latest` or you may build it yourself:
+1. Pull the image: `docker pull ghcr.io/dlchamp/unmonitorr:latest` or you may build it yourself:
     ```bash
     docker build -t unmonitorr:latest .
     ```
@@ -80,7 +81,7 @@ command or as part of your docker compose if you'd rather do it that way.
     version: "3.9"
     services:
       unmonitorr:
-        image: dlchamp/unmonitorr:latest
+        image: ghcr.io/dlchamp/unmonitorr:latest
         container_name: unmonitorr
         ports:
           - "8080:8080"
