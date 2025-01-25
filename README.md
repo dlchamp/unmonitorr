@@ -43,8 +43,6 @@ command or as part of your docker compose if you'd rather do it that way.
 | RADARR_URI                | http://localhost:7878 | Full URL or hostname with the port to your Radarr instance                                    |
 | RADARR_API_KEY            | abc123def456ghi789    | Your API Key (Settings > General > API Key)                                                   |
 | SONARR_URI                | http://localhost:7878 | Full URL or hostname with the port to your Sonarr instance                                    |
-| SONARR_HOST               | localhost             | Hostname or IP address for your Sonarr instance                                               |
-| SONARR_PORT               | 8989                  | Port used by your instance of Sonarr                                                          |
 | SONARR_API_KEY            | xyz987uvw654rst321    | Your API Key (Settings > General > API Key)                                                   |
 | HANDLE_EPISODES           | true                  | Automatically unmonitor episodes. Options: true, false                                        |
 | HANDLE_SERIES             | true                  | Automatically handle entire series. Options: true, false                                      |
