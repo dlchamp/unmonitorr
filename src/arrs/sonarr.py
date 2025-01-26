@@ -2,7 +2,7 @@ from typing import Any
 
 import log
 from config import Config
-from types_ import Episode, Series
+from types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
 
 from . import BaseArrClient, HTTPException
 
@@ -38,38 +38,7 @@ class SonarrClient(BaseArrClient):
 
         logger.debug("Initialized SonarrClient with base_url: %s", self.base_url)
 
-    async def get_episode(self, episode: Episode) -> dict[str, Any] | None:
-        """Fetch details for a specific episode from Sonarr.
-
-        Parameters
-        ----------
-        episode : Episode
-            The episode to fetch details for.
-
-        Returns
-        -------
-        dict[str, Any] | None
-            The episode details if found, otherwise None.
-        """
-        logger.debug("Fetching episode details for episode: %s", episode)
-        method = "GET"
-        url = f"{self.base_url}/episode/{episode.id}"
-
-        try:
-            response = await self.request(method, url, headers=self.headers)
-            logger.debug("Successfully fetched episode details: %s", response)
-        except HTTPException as e:
-            logger.warning(
-                "Unexpected error fetching episode from Sonarr: status=%s, reason=%s",
-                e.status,
-                e.reason,
-            )
-            return None
-
-        else:
-            return response
-
-    async def delete_series(self, id: int) -> None:
+    async def delete_series(self, series: WebhookSeries) -> None:
         """Delete a series from Sonarr.
 
         Parameters
@@ -77,8 +46,8 @@ class SonarrClient(BaseArrClient):
         id : int
             The ID of the series to delete.
         """
-        logger.info("Deleting series with ID: %s", id)
-        url = f"{self.base_url}/series/{id}"
+        logger.info("Deleting series from Sonarr: %s", series)
+        url = f"{self.base_url}/series/{series.id}"
 
         params: dict[str, Any] = {
             "deleteFiles": False,
@@ -87,7 +56,7 @@ class SonarrClient(BaseArrClient):
 
         try:
             await self.request("DELETE", url, headers=self.headers, params=params)
-            logger.info("Successfully deleted series with ID: %s", id)
+            logger.info("Successfully deleted series from Sonarr: %s", series)
         except HTTPException as e:
             logger.warning(
                 "Unexpected error during series deletion: status=%s, reason=%s",
@@ -95,28 +64,28 @@ class SonarrClient(BaseArrClient):
                 e.reason,
             )
 
-    async def unmonitor_episodes(self, series: Series) -> None:
+    async def unmonitor_episodes(self, payload: SonarrWebhookPayload) -> None:
         """Unmonitor episodes for a given series in Sonarr.
 
         Parameters
         ----------
-        series : Series
-            The series whose episodes are to be unmonitored.
+        payload: SonarrWebhookPayload
+            Webhook payload from Sonarr that contains the episodes.
         """
-        logger.info("Attempting to unmonitor episodes for series: %s", series)
-        logger.debug("Series details: %s", series)
+        logger.info("Attempting to unmonitor episodes for series: %s", payload.series)
+        logger.debug("Series details: %s", payload.series.model_dump())
 
         url = f"{self.base_url}/episode/monitor"
         params: dict[str, Any] = {"includeImages": "false"}
 
         json: dict[str, Any] = {
-            "episodeIds": [e.id for e in series.episodes],
+            "episodeIds": [e.id for e in payload.episodes],
             "monitor": False,
         }
 
         try:
             await self.request("PUT", url, headers=self.headers, json=json, params=params)
-            logger.info("Successfully unmonitored episodes for series: %s", series)
+            logger.info("Successfully unmonitored episodes: %s", payload.episodes)
         except HTTPException as e:
             logger.warning(
                 "Unexpected error during unmonitoring episodes: status=%s, reason=%s",
@@ -124,7 +93,7 @@ class SonarrClient(BaseArrClient):
                 e.reason,
             )
 
-    async def get_series(self, id: int) -> dict[str, Any] | None:
+    async def get_series_by_id(self, id: int) -> SonarrAPISeries | None:
         """Fetch details for a specific series from Sonarr.
 
         Parameters
@@ -152,23 +121,25 @@ class SonarrClient(BaseArrClient):
             return None
 
         else:
-            return response
+            return SonarrAPISeries.model_validate(response)
 
-    async def unmonitor_series(self, data: dict[str, Any]) -> None:
+    async def put_updated_series(self, series: SonarrAPISeries) -> None:
         """Mark a series as unmonitored
 
         Parameters
         ----------
-        data: dict[str, Any]
+        series: SonarrAPISeries
             The complete series data from Sonarr.
         """
-        url = f"{self.base_url}/series/{data['id']}"
+        url = f"{self.base_url}/series/{series.id}"
 
-        logger.info("Unmonitoring series with ID: %s", data["id"])
-        logger.debug("Series data to update: %s", data)
+        logger.info("Unmonitoring series: %s", series)
+        logger.debug("Series data to update: %s", series.model_dump())
         try:
-            await self.request("PUT", url, headers=self.headers, json=data)
-            logger.info("Successfully unmonitored series with ID: %s", data["id"])
+            await self.request(
+                "PUT", url, headers=self.headers, json=series.model_dump(by_alias=True)
+            )
+            logger.info("Successfully unmonitored series: %s", series)
         except HTTPException as e:
             logger.warning(
                 "Unexpected error during unmonitoring series: status=%s, reason=%s",

@@ -1,6 +1,5 @@
-from typing import Any
-
 import log
+from types_ import RadarrAPIMovie
 
 from . import BaseArrClient, HTTPException
 
@@ -34,7 +33,7 @@ class RadarrClient(BaseArrClient):
 
         logger.debug("Initialized RadarrClient with base_url: %s", self.base_url)
 
-    async def get_movie(self, id: int) -> dict[str, Any] | None:
+    async def get_movie_by_id(self, id: int) -> RadarrAPIMovie | None:
         """
         Fetch details for a specific movie from Radarr.
 
@@ -62,7 +61,7 @@ class RadarrClient(BaseArrClient):
             )
             return None
         else:
-            return response
+            return RadarrAPIMovie.model_validate(response)
 
     async def delete_movie(self, id: int) -> None:
         """
@@ -86,22 +85,24 @@ class RadarrClient(BaseArrClient):
                 e.reason,
             )
 
-    async def unmonitor_movie(self, data: dict[str, Any]) -> None:
+    async def put_updated_movie(self, movie: RadarrAPIMovie) -> None:
         """
         Unmonitor a specific movie in Radarr.
 
         Parameters
         ----------
-        data : dict[str, Any]
+        movie: RadarAPIMovie
             The movie data containing the ID and updated monitoring status.
         """
-        url = f"{self.base_url}/movie/{data['id']}"
+        url = f"{self.base_url}/movie/{movie.id}"
 
-        logger.info("Unmonitoring movie with ID: %s", data["id"])
-        logger.debug("Movie data to update: %s", data)
+        logger.info("Unmonitoring movie: %s", movie)
+        logger.debug("Movie data to update: %s", movie.model_dump())
         try:
-            await self.request("PUT", url, headers=self.headers, json=data)
-            logger.info("Successfully unmonitored movie with ID: %s", data["id"])
+            await self.request(
+                "PUT", url, headers=self.headers, json=movie.model_dump(by_alias=True)
+            )
+            logger.info("Successfully unmonitored movie: %s", movie)
         except HTTPException as e:
             logger.warning(
                 "Unexpected error during unmonitoring movie: status=%s, reason=%s",
