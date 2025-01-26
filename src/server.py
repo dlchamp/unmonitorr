@@ -1,20 +1,18 @@
-from collections.abc import Callable
-from typing import Any, Final
+from typing import Any
 
 from aiohttp import web
+from pydantic import ValidationError
 
 import log
 from arrs.radarr import RadarrClient
 from arrs.sonarr import SonarrClient
 from config import Config
-from types_ import Movie, Series
+from types_ import RadarrWebhookPayload, SonarrWebhookPayload
 
 logger = log.get_logger(__name__)
 
 
-INVALID: Final[int] = 0
-VALID: Final[int] = 1
-TEST: Final[int] = 2
+PayloadType = RadarrWebhookPayload | SonarrWebhookPayload
 
 
 class WebhookHandler:
@@ -42,7 +40,6 @@ class WebhookHandler:
     async def generic_handler(
         self,
         request: web.Request,
-        processor: Callable[[dict[str, Any]], Any],
     ) -> web.Response:
         """
         Generic handler for webhook payloads.
@@ -51,8 +48,6 @@ class WebhookHandler:
         ----------
         request : web.Request
             The incoming HTTP request.
-        processor : Callable[[dict[str, Any]], Any]
-            A function to process the webhook payload and return an item.
 
         Returns
         -------
@@ -65,31 +60,35 @@ class WebhookHandler:
         logger.debug("Received request headers: %s", headers)
         logger.debug("Received request payload: %s", payload)
 
-        payload_status = self.validate_payload(payload)
-        if payload_status == INVALID:
-            logger.warning("Received invalid payload: %s", headers)
-            logger.debug("Payload content: %s", payload)
-            return web.Response(status=400)
-
-        if payload_status == TEST:
-            logger.info('Received "Test" payload')
+        if not (validated_model := self.validate_payload(payload)):
+            logger.warning(
+                "Incoming payload could not be validated. "
+                "Did it originate from Sonarr or Radarr?: headers=%s, payload=%s",
+                headers,
+                payload,
+            )
             return web.Response()
 
-        item = processor(payload)
-        logger.info("Processing item: %s", item)
-        logger.debug("Item details: %s", item)
+        if "test" in validated_model.event_type.lower():
+            # this is a test payload from sonarr or radarr.
+            logger.info("Received valid test payload from %s", validated_model.instance_name)
+            return web.Response()
 
-        if isinstance(item, Movie):
-            logger.info("Identified item as a Movie.")
-            await self.handle_movie(item)
-        elif isinstance(item, Series):
-            logger.info("Identified item as a Series.")
-            await self.handle_series(item)
+        logger.info(
+            "Received '%s' event payload from %s",
+            validated_model.event_type,
+            validated_model.instance_name,
+        )
+
+        if isinstance(validated_model, RadarrWebhookPayload):
+            await self.handle_movie(validated_model)
+        else:
+            await self.handle_series(validated_model)
 
         logger.debug("Finished processing request.")
         return web.Response()
 
-    def validate_payload(self, payload: dict[str, Any]) -> int:
+    def validate_payload(self, payload: dict[str, Any]) -> PayloadType | None:
         """
         Validate the payload received from the webhook.
 
@@ -98,67 +97,74 @@ class WebhookHandler:
         payload : dict[str, Any]
             The JSON payload from the webhook.
 
+        Raises
+        ------
+        pydantic.ValidationError
+            Error raised if the payload does not validate against any models.
+
         Returns
         -------
-        int
-            Payload status: 0 for invalid, 1 for valid, 2 for test.
+        PayloadType
+            A validated RadarrPayload, RadarrTestPayload, SonarrTestPayload, or SonarrPayload.
         """
-        event_type = payload.get("eventType")
-        logger.debug("Validating payload with eventType: %s", event_type)
+        valid_models: list[type[PayloadType]] = [
+            RadarrWebhookPayload,
+            SonarrWebhookPayload,
+        ]
 
-        if not event_type:
-            logger.warning("Payload missing 'eventType'.")
-            return INVALID
+        for model in valid_models:
+            try:
+                return model.model_validate(payload)
+            except ValidationError:
+                continue
 
-        if event_type == "Test":
-            return TEST
+        return None
 
-        return VALID
-
-    async def handle_movie(self, movie: Movie) -> None:
+    async def handle_movie(self, payload: RadarrWebhookPayload) -> None:
         """
         Handle movie-specific logic for Radarr webhooks.
 
         Parameters
         ----------
-        movie : Movie
-            The movie object to handle.
+        payload: RadarrPayload
+            A movie payload from Radarr's webhook notifications.
         """
+        movie = payload.movie
         logger.info("Handling movie: %s", movie)
-        logger.debug("Movie details: %s", movie)
+        logger.debug("Movie Details: %s", movie.model_dump())
 
         if self.config.REMOVE_MEDIA:
             logger.info("Configured to delete movie. Proceeding with deletion.")
             logger.debug("Deleting movie from Radarr: %s", movie)
             await self.radarr_api.delete_movie(movie.id)
         else:
-            logger.info("Configured to unmonitor movie. Fetching details.")
-            movie_data = await self.radarr_api.get_movie(movie.id)
+            logger.info("Configured to unmonitor movie. Fetching movie details from Radarr")
+            api_movie = await self.radarr_api.get_movie_by_id(movie.id)
 
-            if not movie_data:
-                logger.warning("Movie not found in Radarr: %s", movie)
+            if not api_movie:
+                logger.warning("Unable to fetch movie from Radarr: %s", movie)
                 return
 
-            logger.debug("Fetched movie data: %s", movie_data)
+            logger.debug("Fetched movie from Radarr: %s", api_movie)
 
-            movie_data["monitored"] = False
+            api_movie.unmonitor()
             logger.info("Unmonitoring movie in Radarr: %s", movie)
-            await self.radarr_api.unmonitor_movie(movie_data)
+            await self.radarr_api.put_updated_movie(api_movie)
 
-    async def handle_series(self, series: Series) -> None:
-        """
-        Handle series-specific logic for Sonarr webhooks.
+    async def handle_series(self, payload: SonarrWebhookPayload) -> None:
+        """Handle series-specific logic for Sonarr webhooks.
 
         Parameters
         ----------
-        series : Series
-            The series object to handle.
+        payload : SonarrPayload
+            The sonarr payload to handle.
         """
+        series = payload.series
         logger.info("Handling series: %s", series)
 
         if self.config.HANDLE_EPISODES:
-            logger.info("Unmonitoring episodes for series: %s", series.episodes)
-            await self.sonarr_api.unmonitor_episodes(series)
+            logger.info("Unmonitoring episodes for series: %s", payload.episodes)
+            await self.sonarr_api.unmonitor_episodes(payload)
         else:
             logger.info("Episode handling is disabled. Skipping handling for individual episodes.")
 
@@ -170,9 +176,9 @@ class WebhookHandler:
             return
 
         logger.info("Fetching series data from Sonarr for series ID: %s", series.id)
-        series_data = await self.sonarr_api.get_series(series.id)
+        api_series = await self.sonarr_api.get_series_by_id(series.id)
 
-        if not series_data:
+        if not api_series:
             logger.warning("Series not found in Sonarr: %s", series)
             return
 
@@ -180,23 +186,23 @@ class WebhookHandler:
         can_handle = True
         if self.config.HANDLE_SERIES_ENDED_ONLY:
             logger.info("Checking if series has ended: %s", series)
-            if not self.sonarr_api.series_is_ended(series_data):
+            if not api_series.is_ended:
                 logger.info("Series is ongoing and cannot be handled: %s", series)
                 can_handle = False
             else:
                 logger.info("Series has ended: %s", series)
 
-        if can_handle and self.sonarr_api.series_is_complete(series_data):
+        if can_handle and api_series.is_complete:
             logger.info("Series is complete and ready to handle: %s", series)
             if self.config.REMOVE_MEDIA:
-                logger.info("Removing series from Sonarr: %s", series)
-                await self.sonarr_api.delete_series(series.id)
+                logger.info("Removing series from Sonarr: %s", api_series)
+                await self.sonarr_api.delete_series(series)
             else:
-                series_data["monitored"] = False
-                await self.sonarr_api.unmonitor_series(series_data)
-            logger.info("Series handling complete: %s", series)
+                api_series.unmonitor_series()
+                await self.sonarr_api.put_updated_series(api_series)
+            logger.info("Series handling complete: %s", api_series)
         else:
-            logger.info("Series cannot be handled further: %s", series)
+            logger.info("Series cannot be handled further: %s", api_series)
 
     async def sonarr_endpoint(self, request: web.Request) -> web.Response:
         """
@@ -212,8 +218,7 @@ class WebhookHandler:
         web.Response
             The HTTP response.
         """
-        logger.info("Handling Sonarr webhook request.")
-        return await self.generic_handler(request, Series.from_payload)
+        return await self.generic_handler(request)
 
     async def radarr_endpoint(self, request: web.Request) -> web.Response:
         """
@@ -229,8 +234,7 @@ class WebhookHandler:
         web.Response
             The HTTP response.
         """
-        logger.info("Handling Radarr webhook request.")
-        return await self.generic_handler(request, Movie.from_payload)
+        return await self.generic_handler(request)
 
 
 def init_web_application() -> web.Application:
