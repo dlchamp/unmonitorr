@@ -1,6 +1,7 @@
 from typing import Any
 
 from aiohttp import web
+from jinja2 import Environment, FileSystemLoader
 from pydantic import ValidationError
 
 import log
@@ -16,8 +17,7 @@ PayloadType = RadarrWebhookPayload | SonarrWebhookPayload
 
 
 class WebhookHandler:
-    """
-    Handles webhook requests for Radarr and Sonarr.
+    """Handles webhook requests for Radarr and Sonarr.
 
     Parameters
     ----------
@@ -28,12 +28,12 @@ class WebhookHandler:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.radarr_api = RadarrClient(
-            config.RADARR_URI,
-            config.RADARR_API_KEY,
+            config.radarr_uri,
+            config.radarr_api_key,
         )
         self.sonarr_api = SonarrClient(
-            config.SONARR_URI,
-            config.SONARR_API_KEY,
+            config.sonarr_uri,
+            config.sonarr_api_key,
         )
         logger.debug("Initialized WebhookHandler")
 
@@ -41,8 +41,7 @@ class WebhookHandler:
         self,
         request: web.Request,
     ) -> web.Response:
-        """
-        Generic handler for webhook payloads.
+        """Generic handler for webhook payloads.
 
         Parameters
         ----------
@@ -82,6 +81,7 @@ class WebhookHandler:
 
         if isinstance(validated_model, RadarrWebhookPayload):
             await self.handle_movie(validated_model)
+
         else:
             await self.handle_series(validated_model)
 
@@ -89,23 +89,18 @@ class WebhookHandler:
         return web.Response()
 
     def validate_payload(self, payload: dict[str, Any]) -> PayloadType | None:
-        """
-        Validate the payload received from the webhook.
+        """Validate the payload received from the webhook.
 
         Parameters
         ----------
         payload : dict[str, Any]
             The JSON payload from the webhook.
 
-        Raises
-        ------
-        pydantic.ValidationError
-            Error raised if the payload does not validate against any models.
 
         Returns
         -------
-        PayloadType
-            A validated RadarrPayload, RadarrTestPayload, SonarrTestPayload, or SonarrPayload.
+        PayloadType | None
+            A validated RadarrPayload, SonarrWebhookPayload, or None if not a valid payload.
         """
         valid_models: list[type[PayloadType]] = [
             RadarrWebhookPayload,
@@ -121,19 +116,22 @@ class WebhookHandler:
         return None
 
     async def handle_movie(self, payload: RadarrWebhookPayload) -> None:
-        """
-        Handle movie-specific logic for Radarr webhooks.
+        """Handle movie-specific logic for Radarr webhooks.
 
         Parameters
         ----------
-        payload: RadarrPayload
+        payload: RadarrWebhookPayload
             A movie payload from Radarr's webhook notifications.
         """
+        if self.sonarr_api.is_disabled:
+            logger.info("Radarr client is missing a valid configuration -- Cannot access API.")
+            return
+
         movie = payload.movie
         logger.info("Handling movie: %s", movie)
         logger.debug("Movie Details: %s", movie.model_dump())
 
-        if self.config.REMOVE_MEDIA:
+        if self.config.remove_media:
             logger.info("Configured to delete movie. Proceeding with deletion.")
             logger.debug("Deleting movie from Radarr: %s", movie)
             await self.radarr_api.delete_movie(movie.id)
@@ -156,20 +154,24 @@ class WebhookHandler:
 
         Parameters
         ----------
-        payload : SonarrPayload
-            The sonarr payload to handle.
+        payload : SonarrWebhookPayload
+            The series payload from Sonarr's webhook notifications.
         """
+        if self.sonarr_api.is_disabled:
+            logger.info("Sonarr client is missing a valid configuration -- Cannot access API.")
+            return
         series = payload.series
         logger.info("Handling series: %s", series)
 
-        if self.config.HANDLE_EPISODES:
+        # Check if we are allowed to handle the series.
+        if self.config.handle_episodes:
             logger.info("Unmonitoring episodes for series: %s", payload.episodes)
             await self.sonarr_api.unmonitor_episodes(payload)
         else:
             logger.info("Episode handling is disabled. Skipping handling for individual episodes.")
 
         # Check if we are allowed to handle series
-        if not self.config.HANDLE_SERIES:
+        if not self.config.handle_series:
             logger.info(
                 "Series handling is disabled. Skipping further handling for series: %s", series
             )
@@ -184,7 +186,7 @@ class WebhookHandler:
 
         # Figure out if the series can be handled based on status
         can_handle = True
-        if self.config.HANDLE_SERIES_ENDED_ONLY:
+        if self.config.handle_series_ended_only:
             logger.info("Checking if series has ended: %s", series)
             if not api_series.is_ended:
                 logger.info("Series is ongoing and cannot be handled: %s", series)
@@ -194,9 +196,9 @@ class WebhookHandler:
 
         if can_handle and api_series.is_complete:
             logger.info("Series is complete and ready to handle: %s", series)
-            if self.config.REMOVE_MEDIA:
+            if self.config.remove_media:
                 logger.info("Removing series from Sonarr: %s", api_series)
-                await self.sonarr_api.delete_series(series)
+                await self.sonarr_api.delete_series(series, exclude=self.config.exclude_series)
             else:
                 api_series.unmonitor_series()
                 await self.sonarr_api.put_updated_series(api_series)
@@ -205,8 +207,7 @@ class WebhookHandler:
             logger.info("Series cannot be handled further: %s", api_series)
 
     async def sonarr_endpoint(self, request: web.Request) -> web.Response:
-        """
-        Handle Sonarr webhook requests.
+        """Handle Sonarr webhook requests.
 
         Parameters
         ----------
@@ -237,9 +238,104 @@ class WebhookHandler:
         return await self.generic_handler(request)
 
 
-def init_web_application() -> web.Application:
-    """
-    Initialize the web application with configured routes.
+class Configurator:
+    """Represents the configurator that handles changing Unmonitorr's config."""
+
+    def __init__(self, config: Config, webhook_handler: WebhookHandler) -> None:
+        self.config = config
+        self.webhook_handler = webhook_handler
+
+    def update_radarr_client(self, radarr_uri: str, radarr_api_key: str) -> None:
+        self.webhook_handler.radarr_api.uri = radarr_uri
+        self.webhook_handler.radarr_api.api_key = radarr_api_key
+
+        logger.info("Radarr configuration updated.")
+        logger.debug(
+            "RadarrClient has been updated: URI=%s, API=%s",
+            radarr_uri,
+            radarr_api_key,
+        )
+        if self.webhook_handler.radarr_api.is_disabled:
+            logger.info("Radarr client missing required configuration -- API requests disabled.")
+
+    def update_sonarr_client(self, sonarr_uri: str, sonarr_api_key: str) -> None:
+        self.webhook_handler.sonarr_api.uri = sonarr_uri
+        self.webhook_handler.sonarr_api.api_key = sonarr_api_key
+
+        logger.info("Sonarr configuration updated.")
+        logger.debug(
+            "SonarrClient has been updated: URI=%s, API=%s",
+            sonarr_uri,
+            sonarr_api_key,
+        )
+        if self.webhook_handler.sonarr_api.is_disabled:
+            logger.info("Sonarr client missing required configuration -- API requests disabled.")
+
+    async def setup_page(self, _: web.Request) -> web.Response:
+
+        env = Environment(loader=FileSystemLoader("static"), autoescape=True)
+        html = env.get_template("index.html")
+        config_dict = self.config.to_dict()
+        rendered = html.render(config_dict)
+        return web.Response(text=rendered, content_type="text/html")
+
+    async def save_config(self, request: web.Request) -> web.Response:
+        logger.info("Received request to update the config.")
+        if request.method == "POST":
+            data = await request.post()
+            logger.debug("Configuration Data: %s", data)
+            radarr_uri = str(data.get("radarr_uri", "")).strip()
+            radarr_api_key = str(data.get("radarr_api_key", "")).strip()
+            sonarr_uri = str(data.get("sonarr_uri", "")).strip()
+            sonarr_api_key = str(data.get("sonarr_api_key", "")).strip()
+            handle_episodes = data.get("handle_episodes") == "on"
+            handle_series = data.get("handle_series") == "on"
+            exclude_series = data.get("exclude_series") == "on"
+            handle_series_ended_only = data.get("handle_series_ended_only") == "on"
+            remove_media = data.get("remove_media") == "on"
+
+            is_updated = False
+
+            if radarr_uri != self.config.radarr_uri or radarr_api_key != self.config.radarr_api_key:
+                logger.info("Received new Radarr config - Updating client")
+                self.config.radarr_uri = radarr_uri
+                self.config.radarr_api_key = radarr_api_key
+                self.update_radarr_client(radarr_uri, radarr_api_key)
+                is_updated = True
+
+            if sonarr_uri != self.config.sonarr_uri or sonarr_api_key != self.config.sonarr_api_key:
+                logger.info("Received new Sonarr config -- Updating client.")
+                self.config.sonarr_uri = sonarr_uri
+                self.config.sonarr_api_key = sonarr_api_key
+                self.update_sonarr_client(sonarr_uri, sonarr_api_key)
+                is_updated = True
+
+            if (
+                self.config.handle_episodes != handle_episodes
+                or self.config.handle_series != handle_series
+                or self.config.exclude_series != exclude_series
+                or self.config.handle_series_ended_only != handle_series_ended_only
+                or self.config.remove_media != remove_media
+            ):
+                logger.info("Updating handling rules.")
+                self.config.handle_episodes = handle_episodes
+                self.config.handle_series = handle_series
+                self.config.exclude_series = exclude_series
+                self.config.handle_series_ended_only = handle_series_ended_only
+                self.config.remove_media = remove_media
+                is_updated = True
+
+            if is_updated:
+                logger.info("New configuration has been saved.")
+                self.config.save()
+
+            return web.Response()
+
+        return web.Response(status=405)
+
+
+def init_web_application(config: Config) -> web.Application:
+    """Initialize the web application with configured routes.
 
     Returns
     -------
@@ -247,12 +343,16 @@ def init_web_application() -> web.Application:
         The aiohttp web application instance.
     """
     logger.debug("Initializing web application.")
-    handler = WebhookHandler(Config())
+    handler = WebhookHandler(config)
+    configurator = Configurator(config, handler)
     app = web.Application()
+    app.router.add_static("/static/", path="static", name="static")
     app.add_routes(
         [
             web.post("/radarr", handler.radarr_endpoint),
             web.post("/sonarr", handler.sonarr_endpoint),
+            web.get("/setup", configurator.setup_page),
+            web.post("/save-config", configurator.save_config),
         ],
     )
 
