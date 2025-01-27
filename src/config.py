@@ -31,23 +31,25 @@ class Config:
         # general settings
         self.remove_media: bool = False
 
+        self.load()
+
     @property
     def settings(self) -> str:
         return "Unmonitor Only" if not self.remove_media else "Remove Item"
 
     def save(self) -> None:
         """Dump the config to file."""
-        with open("config.json", "w+") as fp:
+        with open("config/config.json", "w+") as fp:
             json.dump(self.to_dict(), fp, indent=4)
 
     def load(self) -> None:
         """Load the config from file."""
         try:
-            with open("config.json") as fp:
+            with open("config/config.json") as fp:
                 data = json.load(fp)
                 self.from_dict(data)
-        except FileNotFoundError:
-            pass
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.save()
 
     def from_dict(self, data: dict[str, Any]) -> None:
         """Update the configuration from a dictionary."""
