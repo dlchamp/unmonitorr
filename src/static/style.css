@@ -1,4 +1,8 @@
 /* https://coolors.co/palette/10002b-240046-3c096c-5a189a-7b2cbf-9d4edd-c77dff-e0aaff*/
+* {
+    box-sizing: border-box;
+}
+
 
 body {
     font-family: 'Ubuntu', sans-serif;
@@ -9,8 +13,8 @@ body {
 
 .container {
     max-width: 800px;
-    margin: 2rem auto;
-    background: rgba(10 10 10 .6);
+    margin: 1rem auto;
+    background: rgb(20 20 23);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 2rem;
@@ -51,7 +55,7 @@ label {
 
 input[type="text"], input[type="password"], select {
     width: 100%;
-    padding: 0.8rem;
+    padding: 0.5rem;
     border: 1px solid #cccccc;
     border-radius: 4px;
     font-size: 1rem;
@@ -96,7 +100,7 @@ input[type="checkbox"]:checked {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background-color: #18181b;
+    background-color: rgb(25 25 27);
     color: #ffffff;
     padding: 1rem 2rem;
     border-radius: 8px;
