@@ -1,3 +1,6 @@
+import json
+from typing import Any, Final
+
 try:
     import dotenv
 except ModuleNotFoundError:
@@ -6,46 +9,72 @@ else:
     dotenv.load_dotenv(override=True)
 
 import os
-from typing import Final
 
 
 class Config:
-    # RADARR Configuration
-    RADARR_URI: str = os.getenv("RADARR_URI", "")
-    RADARR_API_KEY: str = os.getenv("RADARR_API_KEY", "")
 
-    # SONARR Configuration
-    SONARR_URI: str = os.getenv("SONARR_URI", "")
-    SONARR_API_KEY: str = os.getenv("SONARR_API_KEY", "")
+    def __init__(self) -> None:
+        # RADARR Configuration
+        self.radarr_uri: str = ""
+        self.radarr_api_key: str = ""
 
-    # Sonarr-specific unmonitor settings
-    HANDLE_EPISODES: bool = os.getenv("HANDLE_EPISODES", "true").lower() == "true"
-    HANDLE_SERIES: bool = os.getenv("HANDLE_SERIES", "false").lower() == "true"
-    HANDLE_SERIES_ENDED_ONLY: bool = os.getenv("HANDLE_SERIES_ENDED_ONLY", "true").lower() == "true"
-    EXCLUDE_SERIES: bool = os.getenv("EXCLUDE_SERIES", "true").lower() == "true"
+        # sonarr configuration
+        self.sonarr_uri: str = ""
+        self.sonarr_api_key: str = ""
 
-    # General settings
-    REMOVE_MEDIA: bool = os.getenv("REMOVE_MEDIA", "false").lower() == "true"
+        # sonarr-specific unmonitor settings
+        self.handle_episodes: bool = True
+        self.handle_series: bool = False
+        self.handle_series_ended_only: bool = True
+        self.exclude_series: bool = True
 
-    @staticmethod
-    def validate() -> None:
-        """Validate required configuration values and raise errors if necessary."""
-        missing: list[str] = []
-        if not Config.RADARR_URI:
-            missing.append("RADARR_URI")
-        if not Config.RADARR_API_KEY:
-            missing.append("RADARR_API_KEY")
-        if not Config.SONARR_URI:
-            missing.append("SONARR_URI")
-        if not Config.SONARR_API_KEY:
-            missing.append("SONARR_API_KEY")
-
-        if missing:
-            raise ValueError("Missing required environment variables: %s", ", ".join(missing))
+        # general settings
+        self.remove_media: bool = False
 
     @property
     def settings(self) -> str:
-        return "Unmonitor Only" if not self.REMOVE_MEDIA else "Remove Item"
+        return "Unmonitor Only" if not self.remove_media else "Remove Item"
+
+    def save(self) -> None:
+        """Dump the config to file."""
+        with open("config.json", "w+") as fp:
+            json.dump(self.to_dict(), fp, indent=4)
+
+    def load(self) -> None:
+        """Load the config from file."""
+        try:
+            with open("config.json") as fp:
+                data = json.load(fp)
+                self.from_dict(data)
+        except FileNotFoundError:
+            pass
+
+    def from_dict(self, data: dict[str, Any]) -> None:
+        """Update the configuration from a dictionary."""
+        self.radarr_uri = data.get("radarr_uri", self.radarr_uri)
+        self.radarr_api_key = data.get("radarr_api_key", self.radarr_api_key)
+        self.sonarr_uri = data.get("sonarr_uri", self.sonarr_uri)
+        self.sonarr_api_key = data.get("sonarr_api_key", self.sonarr_api_key)
+        self.handle_episodes = data.get("handle_episodes", self.handle_episodes)
+        self.handle_series = data.get("handle_series", self.handle_series)
+        self.handle_series_ended_only = data.get(
+            "handle_series_ended_only", self.handle_series_ended_only
+        )
+        self.exclude_series = data.get("exclude_series", self.exclude_series)
+        self.remove_media = data.get("remove_media", self.remove_media)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "radarr_uri": self.radarr_uri,
+            "radarr_api_key": self.radarr_api_key,
+            "sonarr_uri": self.sonarr_uri,
+            "sonarr_api_key": self.sonarr_api_key,
+            "handle_episodes": self.handle_episodes,
+            "handle_series": self.handle_series,
+            "handle_series_ended_only": self.handle_series_ended_only,
+            "exclude_series": self.exclude_series,
+            "remove_media": self.remove_media,
+        }
 
 
 class LogConfig:
