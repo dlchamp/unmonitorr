@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 from pydantic import ValidationError
 
 import log
+from arrs import HTTPException
 from arrs.radarr import RadarrClient
 from arrs.sonarr import SonarrClient
 from config import Config
@@ -333,6 +334,27 @@ class Configurator:
 
         return web.Response(status=405)
 
+    async def ping_arr_server(self, request: web.Request) -> web.Response:
+        """Ping the arr server, proxy for the JS validation."""
+        data = await request.json()
+        uri = data.get("uri")
+        api_key = data.get("api_key")
+
+        url = f"{uri}/api"
+        headers: dict[str, str] = {"Content-Type": "application/json", "X-API-Key": api_key}
+
+        logger.info("Pinging server: url=%s", url)
+
+        try:
+            response = await self.webhook_handler.radarr_api.request("GET", url, headers=headers)
+        except HTTPException as e:
+            logger.info("Validation Response: status=%s, reason=%s", e.status, e.reason)
+            return web.json_response(data=e.reason, status=e.status)
+
+        logger.info("Validation success")
+        logger.debug("Validation Response: %s", response)
+        return web.json_response(response)
+
 
 def init_web_application(config: Config) -> web.Application:
     """Initialize the web application with configured routes.
@@ -353,6 +375,7 @@ def init_web_application(config: Config) -> web.Application:
             web.post("/sonarr", handler.sonarr_endpoint),
             web.get("/setup", configurator.setup_page),
             web.post("/save-config", configurator.save_config),
+            web.post("/test-arr", configurator.ping_arr_server),
         ],
     )
 

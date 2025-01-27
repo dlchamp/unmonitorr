@@ -13,6 +13,12 @@
         href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
         rel="stylesheet">
 
+
+
+    <script src="static/js/toast.js"></script>
+    <script src="static/js/validate.js"></script>
+    <script src="https://kit.fontawesome.com/81a0e9f0fb.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body>
@@ -34,6 +40,16 @@
                     <label for="radarr-api-key">Radarr API Key</label>
                     <input type="text" id="radarr-api-key" name="radarr_api_key" placeholder="Your Radarr API Key"
                         value="{{ radarr_api_key}}" maxlength="64" required>
+
+                    <div class="test-container">
+                        <button type="button" class="test-button" id="radarr-test-button" onclick="testRadarr()">
+                            <span class="check"><i class="fa-solid fa-check"></i></span>
+                            <span class="close"><i class="fa-solid fa-x"></i></span>
+                            <span class="button-text">Test</span>
+                        </button>
+                        <p id="radarr-test-result" class="test-result"></p>
+                    </div>
+
                 </div>
             </div>
 
@@ -50,11 +66,21 @@
                 <label for="sonarr-api-key">Sonarr API Key</label>
                 <input type="text" id="sonarr-api-key" name="sonarr_api_key" placeholder="Your Sonarr API Key"
                     value="{{ sonarr_api_key}}" maxlength="64" required>
+
+                <div class="test-container">
+                    <button type="button" class="test-button" id="sonarr-test-button" onclick="testSonarr()">
+                        <span class="check"><i class="fa-solid fa-check"></i></span>
+                        <span class="close"><i class="fa-solid fa-x"></i></span>
+                        <span class="button-text">Test</span>
+                    </button>
+                    <p id="sonarr-test-result" class="test-result"></p>
+                </div>
+
             </div>
 
 
             <!-- General Settings -->
-            <div class="section">
+            <div class="section general">
                 <h2>General Settings</h2>
                 <div class="setting">
                     <input type="checkbox" id="handle-episodes" name="handle_episodes" {% if handle_episodes %}checked{%
@@ -111,77 +137,7 @@
 
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById("config-form");
-            const toast = document.getElementById("toast");
-            const resetButton = document.getElementById("reset-button");
-            const saveButton = document.getElementById("save-button");
-            const toastMessage = document.getElementById("toast-message");
 
-            let originalData = new FormData(form);
-
-            const showToast = (message, buttons = true) => {
-                toastMessage.textContent = message;
-                toast.classList.remove("hidden");
-                resetButton.style.display = buttons ? "inline-block" : "none";
-                saveButton.style.display = buttons ? "inline-block" : "none";
-            };
-
-            const hideToast = () => {
-                toast.classList.add("hidden");
-            };
-
-            const hasUnsavedChanges = () => {
-                const currentData = new FormData(form);
-                for (let [key, value] of originalData.entries()) {
-                    if (currentData.get(key) !== value) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-
-            form.addEventListener("input", () => {
-                if (hasUnsavedChanges()) {
-                    showToast("You have unsaved changes!");
-                } else {
-                    hideToast();
-                }
-            });
-
-            resetButton.addEventListener("click", () => {
-                for (let [key, value] of originalData.entries()) {
-                    const element = form.elements[key];
-                    if (element.type === "checkbox") {
-                        element.checked = value === "on";
-                    } else {
-                        element.value = value;
-                    }
-                }
-                hideToast();
-            });
-
-            saveButton.addEventListener("click", async () => {
-                const formData = new FormData(form);
-                try {
-                    const response = await fetch("/save-config", {
-                        method: "POST",
-                        body: formData,
-                    });
-                    if (response.ok) {
-                        originalData = new FormData(form); // Update original data
-                        showToast("Changes have been saved!", false);
-                        setTimeout(hideToast, 1000);
-                    } else {
-                        showToast("Failed to save changes!", false);
-                    }
-                } catch (error) {
-                    showToast("An error occurred while saving changes!", false);
-                }
-            });
-        });
-    </script>
 
 
 </body>
