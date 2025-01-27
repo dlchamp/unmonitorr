@@ -52,6 +52,7 @@ Unmonitorr can be configured by visiting `/setup`
         --name unmonitorr \
         -p 8080:8080 \
         -e LOG_LEVEL=info \
+        -v /host/path/config/:/app/config/
         ghcr.io/dlchamp/unmonitorr:latest
     ```
 
@@ -65,6 +66,8 @@ Unmonitorr can be configured by visiting `/setup`
         container_name: unmonitorr
         ports:
           - "8080:8080"
+        volumes:
+          - /host/path/config/:/app/config/
         environment:
           LOG_LEVEL: "info"
     ```
