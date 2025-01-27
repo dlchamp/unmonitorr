@@ -1,7 +1,6 @@
 from typing import Any
 
 import log
-from config import Config
 from types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
 
 from . import BaseArrClient, HTTPException
@@ -33,12 +32,20 @@ class SonarrClient(BaseArrClient):
         self.uri = uri
         self.api_key = api_key
 
+        if self.is_disabled:
+            logger.info("Sonarr configuration missing. Client disabled.")
+
         self.base_url = f"{uri}/api/v3"
         self.headers = {"X-API-Key": api_key, "Accept": "application/json"}
 
         logger.debug("Initialized SonarrClient with base_url: %s", self.base_url)
 
-    async def delete_series(self, series: WebhookSeries) -> None:
+    @property
+    def is_disabled(self) -> bool:
+        """Returns True if client is missing URL or API key."""
+        return not self.uri or not self.api_key
+
+    async def delete_series(self, series: WebhookSeries, *, exclude: bool = False) -> None:
         """Delete a series from Sonarr.
 
         Parameters
@@ -50,8 +57,8 @@ class SonarrClient(BaseArrClient):
         url = f"{self.base_url}/series/{series.id}"
 
         params: dict[str, Any] = {
-            "deleteFiles": False,
-            "addImportListExclusion": Config.EXCLUDE_SERIES,
+            "deleteFiles": "false",
+            "addImportListExclusion": "true" if exclude else "false",
         }
 
         try:
