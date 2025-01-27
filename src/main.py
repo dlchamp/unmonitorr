@@ -10,10 +10,12 @@ logger = log.get_logger(__name__)
 
 
 async def main() -> None:
-    Config.validate()
-    logger.debug("Configuration validated successfully")
+    config = Config()
+    config.load()
 
-    app = init_web_application()
+    logger.info("Config loaded.")
+
+    app = init_web_application(config)
     logger.debug("Initializing web application.")
 
     runner = web.AppRunner(app)
