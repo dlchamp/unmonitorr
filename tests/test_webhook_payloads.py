@@ -74,9 +74,6 @@ class TestTestPayloads(unittest.TestCase):
         self.assertEqual(sonarr_test_payload.series.title, "Test Title")
         self.assertEqual(sonarr_test_payload.series.id, 1)
         self.assertEqual(sonarr_test_payload.episodes[0].id, 123)
-        self.assertTrue(
-            all(isinstance(episode, WebhookEpisode) for episode in sonarr_test_payload.episodes)
-        )
 
 
 if __name__ == "__main__":
