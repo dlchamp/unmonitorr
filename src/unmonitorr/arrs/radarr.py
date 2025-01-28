@@ -1,7 +1,7 @@
-import log
-from types_ import RadarrAPIMovie
+from unmonitorr import log
+from unmonitorr.types_ import RadarrAPIMovie
 
-from . import BaseArrClient, HTTPException
+from .arrbase import BaseArrClient, HTTPException
 
 logger = log.get_logger(__name__)
 

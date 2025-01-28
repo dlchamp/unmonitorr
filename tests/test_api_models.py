@@ -1,7 +1,7 @@
 from typing import Any
 import unittest
 
-from src.types_ import RadarrAPIMovie, SonarrAPISeries
+from src.unmonitorr.types_ import SonarrAPISeries, RadarrAPIMovie
 
 
 class TestAPIModels(unittest.TestCase):

@@ -2,7 +2,7 @@ from typing import Any
 
 import aiohttp
 
-import log
+from unmonitorr import log
 
 logger = log.get_logger(__name__)
 

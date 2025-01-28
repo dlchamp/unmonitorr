@@ -4,9 +4,8 @@ from typing import Any
 
 from aiohttp import web
 
-import log
-from config import Config
-from server import init_web_application
+from unmonitorr import log, server
+from unmonitorr.config import Config
 
 logger = log.get_logger(__name__)
 
@@ -16,7 +15,7 @@ async def main() -> None:
 
     logger.info("Config loaded.")
 
-    app = init_web_application(config)
+    app = server.init_web_application(config)
     logger.debug("Initializing web application.")
 
     runner = web.AppRunner(app)

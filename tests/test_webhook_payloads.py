@@ -1,11 +1,9 @@
 from typing import Any
 import unittest
-from src.types_.webhook import (
+from src.unmonitorr.types_ import (
     RadarrWebhookPayload,
     SonarrWebhookPayload,
-    WebhookSeries,
     WebhookEpisode,
-    WebhookMovie,
 )
 
 

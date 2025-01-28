@@ -1,9 +1,9 @@
 from typing import Any
 
-import log
-from types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
+from unmonitorr import log
+from unmonitorr.types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
 
-from . import BaseArrClient, HTTPException
+from .arrbase import BaseArrClient, HTTPException
 
 logger = log.get_logger(__name__)
 

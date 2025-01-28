@@ -4,17 +4,15 @@ from aiohttp import web
 from jinja2 import Environment, FileSystemLoader
 from pydantic import ValidationError
 
-import log
-from arrs import HTTPException
-from arrs.radarr import RadarrClient
-from arrs.sonarr import SonarrClient
-from config import Config
-from types_ import RadarrWebhookPayload, SonarrWebhookPayload
+from unmonitorr import log
+from unmonitorr.arrs import HTTPException, RadarrClient, SonarrClient
+from unmonitorr.config import Config
+from unmonitorr.types_ import RadarrWebhookPayload, SonarrWebhookPayload
 
 logger = log.get_logger(__name__)
 
 
-PayloadType = RadarrWebhookPayload | SonarrWebhookPayload
+PayloadTypeT = RadarrWebhookPayload | SonarrWebhookPayload
 
 
 class WebhookHandler:
@@ -89,7 +87,7 @@ class WebhookHandler:
         logger.debug("Finished processing request.")
         return web.Response()
 
-    def validate_payload(self, payload: dict[str, Any]) -> PayloadType | None:
+    def validate_payload(self, payload: dict[str, Any]) -> PayloadTypeT | None:
         """Validate the payload received from the webhook.
 
         Parameters
@@ -103,7 +101,7 @@ class WebhookHandler:
         PayloadType | None
             A validated RadarrPayload, SonarrWebhookPayload, or None if not a valid payload.
         """
-        valid_models: list[type[PayloadType]] = [
+        valid_models: list[type[PayloadTypeT]] = [
             RadarrWebhookPayload,
             SonarrWebhookPayload,
         ]
@@ -274,7 +272,7 @@ class Configurator:
 
     async def setup_page(self, _: web.Request) -> web.Response:
 
-        env = Environment(loader=FileSystemLoader("static"), autoescape=True)
+        env = Environment(loader=FileSystemLoader("unmonitorr/static"), autoescape=True)
         html = env.get_template("index.html")
         config_dict = self.config.to_dict()
         rendered = html.render(config_dict)
@@ -378,7 +376,7 @@ def init_web_application(config: Config) -> web.Application:
     handler = WebhookHandler(config)
     configurator = Configurator(config, handler)
     app = web.Application()
-    app.router.add_static("/static/", path="static", name="static")
+    app.router.add_static("/static/", path="unmonitorr/static", name="static")
     app.add_routes(
         [
             web.post("/radarr", handler.radarr_endpoint),
