@@ -12,38 +12,7 @@ COMPLETE_PERCENT = 100
 
 
 class SonarrClient(BaseArrClient):
-    """A client for interacting with Sonarr's API.
-
-    Parameters
-    ----------
-    proto : str
-        Protocol to use (http or https).
-    host : str
-        Hostname or IP address of the Sonarr server.
-    port : int
-        Port number of the Sonarr server.
-    api_key : str
-        API key for authenticating with the Sonarr server.
-    """
-
-    def __init__(self, uri: str, api_key: str) -> None:
-        super().__init__()
-
-        self.uri = uri
-        self.api_key = api_key
-
-        if self.is_disabled:
-            logger.info("Sonarr configuration missing. Client disabled.")
-
-        self.base_url = f"{uri}/api/v3"
-        self.headers = {"X-API-Key": api_key, "Accept": "application/json"}
-
-        logger.debug("Initialized SonarrClient with base_url: %s", self.base_url)
-
-    @property
-    def is_disabled(self) -> bool:
-        """Returns True if client is missing URL or API key."""
-        return not self.uri or not self.api_key
+    """A client for interacting with Radarr's API."""
 
     async def delete_series(self, series: WebhookSeries, *, exclude: bool = False) -> None:
         """Delete a series from Sonarr.
