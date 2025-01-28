@@ -8,13 +8,21 @@ async function testRadarr() {
     const buttonText = buttonElement.querySelector('.button-text')
     const iconClose = buttonElement.querySelector('.close');
     const iconCheck = buttonElement.querySelector('.check');
+    const iconSpinner = buttonElement.querySelector('.testing');
+
+    buttonElement.setAttribute('disabled', true);
+    buttonText.style.display = "none"
+    iconSpinner.style.display = "inline-block";
 
     try {
         const response = await fetch(
             '/test-arr', {
-            method: 'POST', body: JSON.stringify({ 'uri': uri, 'api_key': apiKey })
+            method: 'POST', body: JSON.stringify(
+                { 'uri': uri, 'api_key': apiKey, 'client': 'Radarr' }
+            )
         }
         );
+        iconSpinner.style.display = "none";
         if (response.ok) {
             buttonText.style.display = "none";
             resultElement.textContent = "";
@@ -30,11 +38,12 @@ async function testRadarr() {
         buttonText.style.display = "none";
         iconClose.style.display = "inline-block";
     } finally {
-
         setTimeout(() => {
             buttonText.style.display = "inline-block";
             iconCheck.style.display = "none";
             iconClose.style.display = "none";
+            buttonElement.removeAttribute('disabled');
+
         }, 2000);
     }
 }
@@ -49,12 +58,21 @@ async function testSonarr() {
     const iconClose = buttonElement.querySelector('.close');
     const iconCheck = buttonElement.querySelector('.check');
 
+    const iconSpinner = buttonElement.querySelector('.testing');
+
+    buttonElement.setAttribute('disabled', true);
+    buttonText.style.display = "none"
+    iconSpinner.style.display = "inline-block";
+
     try {
         const response = await fetch(
             '/test-arr', {
-            method: 'POST', body: JSON.stringify({ 'uri': uri, 'api_key': apiKey })
+            method: 'POST', body: JSON.stringify(
+                { 'uri': uri, 'api_key': apiKey, 'client': 'Sonarr' }
+            )
         }
         );
+        iconSpinner.style.display = "none";
         if (response.ok) {
             buttonText.style.display = "none";
             resultElement.textContent = "";
@@ -70,11 +88,11 @@ async function testSonarr() {
         buttonText.style.display = "none";
         iconClose.style.display = "inline-block";
     } finally {
-
         setTimeout(() => {
             buttonText.style.display = "inline-block";
             iconCheck.style.display = "none";
             iconClose.style.display = "none";
+            buttonElement.removeAttribute('disabled');
         }, 2000);
     }
 }
