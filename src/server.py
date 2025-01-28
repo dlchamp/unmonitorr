@@ -337,21 +337,31 @@ class Configurator:
     async def ping_arr_server(self, request: web.Request) -> web.Response:
         """Ping the arr server, proxy for the JS validation."""
         data = await request.json()
-        uri = data.get("uri")
-        api_key = data.get("api_key")
+        uri = data.get("uri") or "MISSING"
+        api_key = data.get("api_key") or "MISSING"
+        client = data.get("client")
+
+        if "MISSING" in (uri, api_key):
+            logger.info(
+                "Could not test %s with missing values: uri=%s, key=%s",
+                client,
+                uri,
+                api_key,
+            )
+            return web.Response(status=401, text="URI or API KEY missing.")
 
         url = f"{uri}/api"
         headers: dict[str, str] = {"Content-Type": "application/json", "X-API-Key": api_key}
 
-        logger.info("Pinging server: url=%s", url)
+        logger.info("Pinging %s: url=%s", client, url)
 
         try:
             response = await self.webhook_handler.radarr_api.request("GET", url, headers=headers)
         except HTTPException as e:
             logger.info("Validation Response: status=%s, reason=%s", e.status, e.reason)
-            return web.json_response(data=e.reason, status=e.status)
+            return web.Response(status=e.status, text=e.reason)
 
-        logger.info("Validation success")
+        logger.info("%s validation success", client)
         logger.debug("Validation Response: %s", response)
         return web.json_response(response)
 
