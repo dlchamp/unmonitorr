@@ -122,7 +122,7 @@ class WebhookHandler:
         payload: RadarrWebhookPayload
             A movie payload from Radarr's webhook notifications.
         """
-        if self.sonarr_api.is_disabled:
+        if self.radarr_api.disabled:
             logger.info("Radarr client is missing a valid configuration -- Cannot access API.")
             return
 
@@ -156,9 +156,10 @@ class WebhookHandler:
         payload : SonarrWebhookPayload
             The series payload from Sonarr's webhook notifications.
         """
-        if self.sonarr_api.is_disabled:
+        if self.sonarr_api.disabled:
             logger.info("Sonarr client is missing a valid configuration -- Cannot access API.")
             return
+
         series = payload.series
         logger.info("Handling series: %s", series)
 
@@ -245,8 +246,7 @@ class Configurator:
         self.webhook_handler = webhook_handler
 
     def update_radarr_client(self, radarr_uri: str, radarr_api_key: str) -> None:
-        self.webhook_handler.radarr_api.uri = radarr_uri
-        self.webhook_handler.radarr_api.api_key = radarr_api_key
+        self.webhook_handler.radarr_api.update_client_config(radarr_uri, radarr_api_key)
 
         logger.info("Radarr configuration updated.")
         logger.debug(
@@ -254,12 +254,11 @@ class Configurator:
             radarr_uri,
             radarr_api_key,
         )
-        if self.webhook_handler.radarr_api.is_disabled:
+        if self.webhook_handler.radarr_api.disabled:
             logger.info("Radarr client missing required configuration -- API requests disabled.")
 
     def update_sonarr_client(self, sonarr_uri: str, sonarr_api_key: str) -> None:
-        self.webhook_handler.sonarr_api.uri = sonarr_uri
-        self.webhook_handler.sonarr_api.api_key = sonarr_api_key
+        self.webhook_handler.sonarr_api.update_client_config(sonarr_uri, sonarr_api_key)
 
         logger.info("Sonarr configuration updated.")
         logger.debug(
@@ -267,7 +266,7 @@ class Configurator:
             sonarr_uri,
             sonarr_api_key,
         )
-        if self.webhook_handler.sonarr_api.is_disabled:
+        if self.webhook_handler.sonarr_api.disabled:
             logger.info("Sonarr client missing required configuration -- API requests disabled.")
 
     async def setup_page(self, _: web.Request) -> web.Response:
