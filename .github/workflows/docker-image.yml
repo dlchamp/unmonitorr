@@ -42,4 +42,6 @@ jobs:
             --platform ${{ inputs.platform }} \
             --build-arg PLATFORM=${{ inputs.platform }} \
             --tag ghcr.io/${{ github.repository_owner }}/unmonitorr:${{ inputs.tag }} \
-            --push .
+            --output=type=image,push=true \
+            --provenance=false \
+            .
