@@ -11,7 +11,6 @@ logger = log.get_logger(__name__)
 
 async def main() -> None:
     config = Config()
-    config.load()
 
     logger.info("Config loaded.")
 
