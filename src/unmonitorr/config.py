@@ -10,6 +10,9 @@ else:
 
 import os
 
+CONFIG_PATH: Final[str] = "unmonitorr/config-data"
+os.makedirs(CONFIG_PATH, exist_ok=True)
+
 
 class Config:
 
@@ -39,13 +42,13 @@ class Config:
 
     def save(self) -> None:
         """Dump the config to file."""
-        with open("unmonitorr/config-data/config.json", "w+") as fp:
+        with open(f"{CONFIG_PATH}/config.json", "w+") as fp:
             json.dump(self.to_dict(), fp, indent=4)
 
     def load(self) -> None:
         """Load the config from file."""
         try:
-            with open("unmonitorr/config-data/config.json") as fp:
+            with open(f"{CONFIG_PATH}/config.json") as fp:
                 data = json.load(fp)
                 self.from_dict(data)
         except (FileNotFoundError, json.JSONDecodeError):
