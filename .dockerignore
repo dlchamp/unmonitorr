@@ -4,5 +4,5 @@
 !requirements.txt
 !LICENSE
 
-src/logs/
-src/config/
+src/unmonitorr/logs
+src/unmonitorr/config-data
