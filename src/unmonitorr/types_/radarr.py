@@ -17,7 +17,7 @@ class RadarrAPIMovie(SharedBaseModel):
     def __repr__(self) -> str:
         return f"<APIMovie, {self.__str__()}>"
 
-    def _str__(self) -> str:
+    def __str__(self) -> str:
         return (
             f"id={self.id}, title={self.title}, path={self.path}, "
             f"size={self.size_on_disk}, monitored={self.monitored}"
