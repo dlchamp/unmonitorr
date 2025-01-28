@@ -3,7 +3,6 @@ import unittest
 from src.unmonitorr.types_ import (
     RadarrWebhookPayload,
     SonarrWebhookPayload,
-    WebhookEpisode,
 )
 
 
