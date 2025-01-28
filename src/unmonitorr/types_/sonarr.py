@@ -63,7 +63,10 @@ class SonarrAPISeries(SharedBaseModel):
         self.monitored = False
 
     def __repr__(self) -> str:
+        return f"<APISeries, {self.__str__()}>"
+
+    def __str__(self) -> str:
         return (
-            f"<Series, id={self.id}, title={self.title}, year={self.year}, "
-            f"seasons={len(self.seasons)}, complete={self.is_complete}, monitored={self.monitored}>"
+            f"id={self.id}, title={self.title}, year={self.year}, "
+            f"seasons={len(self.seasons)}, complete={self.is_complete}, monitored={self.monitored}"
         )

@@ -8,10 +8,10 @@ class WebhookMovie(SharedBaseModel):
     folder_path: str
 
     def __repr__(self) -> str:
-        return (
-            f"<Movie, id={self.id}, title={self.title}, "
-            f"year={self.year}, path={self.folder_path}>"
-        )
+        return f"<Movie, {self.__str__()}>"
+
+    def __str__(self) -> str:
+        return f"id={self.id}, title={self.title}, year={self.year}, path={self.folder_path}"
 
 
 class RadarrWebhookPayload(SharedBaseModel):
@@ -28,7 +28,10 @@ class WebhookSeries(SharedBaseModel):
     year: int
 
     def __repr__(self) -> str:
-        return f"<Series, id={self.id}, title={self.title}, year={self.year}, path={self.path}>"
+        return f"<Series, {self.__str__()}>"
+
+    def __str__(self) -> str:
+        return f"id={self.id}, title={self.title}, year={self.year}, path={self.path}"
 
 
 class WebhookEpisode(SharedBaseModel):
@@ -39,9 +42,12 @@ class WebhookEpisode(SharedBaseModel):
     series_id: int
 
     def __repr__(self) -> str:
+        return f"<Episode, {self.__str__()}>"
+
+    def __str__(self) -> str:
         return (
-            f"<Episode, id={self.id}, title={self.title}, episode_number={self.episode_number}, "
-            f"season_number={self.season_number}, series_id={self.series_id}>"
+            f"id={self.id}, title={self.title}, episode_number={self.episode_number}, "
+            f"season_number={self.season_number}, series_id={self.series_id}"
         )
 
 
