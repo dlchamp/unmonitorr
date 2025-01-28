@@ -165,22 +165,6 @@ input[type="checkbox"]:checked {
     gap: 1rem;
 }
 
-.test-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: .6rem 1.5rem;
-    background-color: #6c63ff;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.test-button:hover {
-    background-color: #5849d0;
-}
 
 .test-result {
     margin: 0;
@@ -200,6 +184,29 @@ input[type="checkbox"]:checked {
     color: red;
 }
 
-.check, .close {
+.check, .close, .testing {
     display: none;
+}
+
+.test-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .6rem 1.5rem;
+    background-color: #6c63ff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 75px;
+    height: 40px;
+}
+
+.test-button:disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.test-button:hover {
+    background-color: #5849d0;
 }
