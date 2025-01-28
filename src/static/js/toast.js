@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData,
             });
             if (response.ok) {
-                originalData = new FormData(form); // Update original data
+                originalData = new FormData(form);
                 showToast("Changes have been saved!", false);
                 setTimeout(hideToast, 1000);
             } else {

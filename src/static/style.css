@@ -1,4 +1,10 @@
 /* https://coolors.co/palette/10002b-240046-3c096c-5a189a-7b2cbf-9d4edd-c77dff-e0aaff*/
+:root {
+    --light-purple:#9D4EDD;
+    --dark-purple:#7B2CBF;
+    --really-dark-purple: #5A189A;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -22,13 +28,13 @@ body {
 
 h1 {
     text-align: center;
-    color: #E0AAFF;
+    color: var(--light-purple);
 }
 
 h2 {
     margin-top: 2rem;
-    color: #C77DFF;
-    border-bottom: 2px solid #C77DFF;
+    color: var(--light-purple);
+    border-bottom: 2px solid var(--light-purple);
     padding-bottom: 0.5rem;
 }
 
@@ -40,7 +46,7 @@ form {
 
 label {
     font-weight: bold;
-    color: #9D4EDD;
+    color: var(--light-purple);
     padding-bottom: 0.5rem;
     display: inline-block;
 }
@@ -68,7 +74,7 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    accent-color: #5A189A;
+    accent-color: var(--light-purple);
 }
 
 .checkbox-group {
@@ -133,7 +139,7 @@ input[type="checkbox"]:checked {
 }
 
 .toast-button.save {
-    background-color: #9D4EDD;
+    background-color: var(--light-purple);
     color: #ffffff;
     border: none;
 }
@@ -148,7 +154,7 @@ input[type="checkbox"]:checked {
 }
 
 .toast-button.save:hover {
-    background-color: #5A189A;
+    background-color: var(--dark-purple);
 }
 
 
@@ -193,7 +199,7 @@ input[type="checkbox"]:checked {
     align-items: center;
     justify-content: center;
     padding: .6rem 1.5rem;
-    background-color: #6c63ff;
+    background-color: var(--light-purple);
     border: none;
     border-radius: 4px;
     font-size: 1rem;
@@ -208,5 +214,5 @@ input[type="checkbox"]:checked {
 }
 
 .test-button:hover {
-    background-color: #5849d0;
+    background-color: var(--dark-purple);
 }
