@@ -72,7 +72,6 @@ class RadarrClient(BaseArrClient):
         """
         url = f"{self.base_url}/movie/{movie.id}"
 
-        logger.info("Unmonitoring movie: %s", movie)
         logger.debug("Movie data to update: %s", movie.model_dump())
         try:
             await self.request(
