@@ -96,10 +96,11 @@
                     <input type="checkbox" id="handle-series" name="handle_series" {% if handle_series %}checked{% endif
                         %}>
                     <label for="handle-series">Handle Series</label>
-                    <p>Only series that are 100% available are handled.<br /><strong>Important: Enabling this feature
-                            without also enabling "Handle Only Ended Series" means that an ongoing series could be
-                            handled
-                            if all current episodes are available.</strong>
+                    <p>Only series that are 100% available are handled.<br /><strong>Important:</strong> Enabling this
+                        feature
+                        without also enabling "Handle Only Ended Series" means that an ongoing series could be
+                        handled
+                        if all current episodes are available.
                     </p>
                 </div>
 
@@ -115,9 +116,11 @@
                     <input type="checkbox" id="remove-media" name="remove_media" {% if remove_media %}checked{% endif
                         %}>
                     <label for="remove-media">Remove Media</label>
-                    <p>Enabling this will fully delete the media from Sonarr/Radarr.<br /><strong>Important: This does
-                            not
-                            delete from the file system.</strong></p>
+                    <p>Enabling this will fully delete the media from Sonarr/Radarr.<br /><i>Note: Only applies to
+                            series in Sonarr. Individual episodes and seasons cannot be
+                            removed.</i><br /><strong>Important:</strong> This does
+                        not
+                        delete from the file system.</p>
                 </div>
 
                 <div class="setting">
