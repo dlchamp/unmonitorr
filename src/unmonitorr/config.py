@@ -39,13 +39,13 @@ class Config:
 
     def save(self) -> None:
         """Dump the config to file."""
-        with open("unmonitorr/config/config.json", "w+") as fp:
+        with open("unmonitorr/config-data/config.json", "w+") as fp:
             json.dump(self.to_dict(), fp, indent=4)
 
     def load(self) -> None:
         """Load the config from file."""
         try:
-            with open("unmonitorr/config/config.json") as fp:
+            with open("unmonitorr/config-data/config.json") as fp:
                 data = json.load(fp)
                 self.from_dict(data)
         except (FileNotFoundError, json.JSONDecodeError):
