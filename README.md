@@ -36,6 +36,7 @@ Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optim
 Unmonitorr can be configured by visiting `/setup`
 (ex. http://localhost:8080/setup)
 
+![Screenshot of the Config Page](https://github.com/dlchamp/unmonitorr/blob/add-webui-config/config-page.png?raw=true)
 ---
 
 ### Setting Up with Docker
