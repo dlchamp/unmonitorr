@@ -15,7 +15,7 @@ __all__ = (
     "LogConfig",
 )
 
-CONFIG_PATH: Final[str] = "unmonitorr/config-data"
+CONFIG_PATH: Final[str] = "unmonitorr/data/"
 os.makedirs(CONFIG_PATH, exist_ok=True)
 
 
