@@ -32,9 +32,9 @@ class Config:
 
         # sonarr-specific unmonitor settings
         self.handle_episodes: bool = True
-        self.handle_series: bool = False
+        self.handle_series: bool = True
         self.handle_series_ended_only: bool = True
-        self.exclude_series: bool = True
+        self.exclude_series: bool = False
 
         # general settings
         self.remove_media: bool = False
