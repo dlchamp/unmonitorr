@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unmonitorr Configuration</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
+
+
+
+    <script src="static/js/toast.js"></script>
+    <script src="static/js/validate.js"></script>
+    <script src="https://kit.fontawesome.com/81a0e9f0fb.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Unmonitorr Configuration</h1>
+        <form id='config-form' action="/setup" method="post" , accept-charset="utf-8"
+            enctype="application/x-www-form-urlencoded">
+            <!-- Radarr Settings -->
+            <div class="section">
+                <h2>Radarr Settings</h2>
+                <div class="form-item">
+                    <label for="radarr-uri">Radarr URI</label>
+                    <input type="text" id="radarr-uri" name="radarr_uri" placeholder="http://localhost:7878"
+                        value="{{ radarr_uri }}" pattern="https?://.*"
+                        title="Please enter a valid URL starting with http:// or https://" required>
+                </div>
+
+                <div class="form-item">
+                    <label for="radarr-api-key">Radarr API Key</label>
+                    <input type="text" id="radarr-api-key" name="radarr_api_key" placeholder="Your Radarr API Key"
+                        value="{{ radarr_api_key}}" maxlength="64" required>
+
+                    <div class="test-container">
+                        <button type="button" class="test-button" id="radarr-test-button" onclick="testRadarr()">
+                            <span class="check"><i class="fa-solid fa-check"></i></span>
+                            <span class="close"><i class="fa-solid fa-x"></i></span>
+                            <span class="testing"><i class="fa-solid fa-spinner fa-spin-pulse"></i></span>
+                            <span class="button-text">Test</span>
+                        </button>
+                        <p id="radarr-test-result" class="test-result"></p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Sonarr Settings -->
+            <div class="section">
+                <h2>Sonarr Settings</h2>
+                <div class="form-item">
+                    <label for="sonarr-uri">Sonarr URI</label>
+                    <input type="text" id="sonarr-uri" name="sonarr_uri" placeholder="http://localhost:8989"
+                        value="{{ sonarr_uri}}" pattern="https?://.*"
+                        title="Please enter a valid URL starting with http:// or https://" required>
+                </div>
+                <div class="form-item"></div>
+                <label for="sonarr-api-key">Sonarr API Key</label>
+                <input type="text" id="sonarr-api-key" name="sonarr_api_key" placeholder="Your Sonarr API Key"
+                    value="{{ sonarr_api_key}}" maxlength="64" required>
+
+                <div class="test-container">
+                    <button type="button" class="test-button" id="sonarr-test-button" onclick="testSonarr()">
+                        <span class="check"><i class="fa-solid fa-check"></i></span>
+                        <span class="close"><i class="fa-solid fa-x"></i></span>
+                        <span class="testing"><i class="fa-solid fa-spinner fa-spin-pulse"></i></span>
+                        <span class="button-text">Test</span>
+                    </button>
+                    <p id="sonarr-test-result" class="test-result"></p>
+                </div>
+
+            </div>
+
+
+            <!-- General Settings -->
+            <div class="section general">
+                <h2>General Settings</h2>
+                <div class="setting">
+                    <input type="checkbox" id="handle-episodes" name="handle_episodes" {% if handle_episodes %}checked{%
+                        endif %}>
+                    <label for="handle-episodes">Handle Episodes</label>
+                    <p>Enable to handle individual episodes.</p>
+
+                </div>
+
+                <div class="setting">
+                    <input type="checkbox" id="handle-series" name="handle_series" {% if handle_series %}checked{% endif
+                        %}>
+                    <label for="handle-series">Handle Series</label>
+                    <p>Only series that are 100% available are handled.<br /><strong>Important:</strong> Enabling this
+                        feature
+                        without also enabling "Handle Only Ended Series" means that an ongoing series could be
+                        handled
+                        if all current episodes are available.
+                    </p>
+                </div>
+
+                <div class="setting">
+                    <input type="checkbox" id="handle-series-ended-only" name="handle_series_ended_only" {% if
+                        handle_series_ended_only %}checked{% endif %}>
+                    <label for="handle-series-ended-only">Handle Only Ended Series</label>
+                    <p>Extends series handling to only handle completed series that are also "ended."</p>
+
+                </div>
+
+                <div class="setting">
+                    <input type="checkbox" id="remove-media" name="remove_media" {% if remove_media %}checked{% endif
+                        %}>
+                    <label for="remove-media">Remove Media</label>
+                    <p>Enabling this will fully delete the media from Sonarr/Radarr.<br /><i>Note: Only applies to
+                            series in Sonarr. Individual episodes and seasons cannot be
+                            removed.</i><br /><strong>Important:</strong> This does
+                        not
+                        delete from the file system.</p>
+                </div>
+
+                <div class="setting">
+                    <input type="checkbox" id="exclude-series" name="exclude_series" {% if exclude_series %}checked{%
+                        endif %}>
+                    <label for="exclude-series">Exclude Series</label>
+                    <p>Prevent the series from being re-imported via lists. Only applies if "Remove Media" is enabled.
+                    </p>
+
+                </div>
+            </div>
+        </form>
+
+        <div id="toast" class="toast hidden">
+            <span id="toast-message">You have unsaved changes!</span>
+            <button id="reset-button" class="toast-button reset">Reset</button>
+            <button id="save-button" class="toast-button save">Save Changes</button>
+        </div>
+
+    </div>
+
+
+
+
+</body>
+
+</html>

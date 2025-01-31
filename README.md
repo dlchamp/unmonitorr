@@ -2,16 +2,15 @@
 
 Unmonitorr is a lightweight tool designed to listen for incoming webhook notifications from Radarr and Sonarr, enabling automated management of media. Depending on your configuration, Unmonitorr can either unmonitor or remove media directly from Radarr and Sonarr.
 
-Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optimized for efficiency.
+Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optimized for efficiency.  
+&nbsp;  
 
----
 
 ## Features
 - Listens for Radarr and Sonarr webhook notifications.
 - Automatically unmonitor episodes or series.
-- Optionally removes media from Radarr and Sonarr based on user configuration.
-
----
+- Optionally removes media from Radarr and Sonarr based on user configuration.  
+&nbsp;  
 
 ## How It Works
 1. Unmonitorr runs a small web server using `aiohttp`.
@@ -19,41 +18,27 @@ Built with Python 3.12 and `aiohttp`, Unmonitorr is fully asynchronous and optim
 3. Depending on your configuration:
    - Unmonitorr unmonitors the media (episodes, movies, or series).
    - Optionally removes the media from Radarr or Sonarr.
-4. It uses the respective APIs to perform these operations.
-
----
+4. It uses the respective APIs to perform these operations.  
+&nbsp;  
 
 ## Requirements
 - Python 3.12+
 - Radarr and/or Sonarr configured to send webhooks to Unmonitorr.
 - aiohttp
-- Docker (optional, for containerized deployments).
----
+- Docker (optional, for containerized deployments).  
+&nbsp;  
 
-## Installation
 
 ### Configuration Options
-These options can be placed into a .env file if using Windows/Linux or you can pass them to your docker run
-command or as part of your docker compose if you'd rather do it that way.
+Unmonitorr can be configured by visiting `/setup`
+(ex. http://localhost:8080/setup)
 
-| KEY                       | Example Value         | Default Value |  Description                                                                                  |
-|---------------------------|-----------------------|---------------|-----------------------------------------------------------------------------------------------|
-| RADARR_URI                | http://localhost:7878 |               | Full URL or hostname with the port to your Radarr instance                                    |
-| RADARR_API_KEY            | abc123def456ghi789    |               | Your API Key (Settings > General > API Key)                                                   |
-| SONARR_URI                | http://localhost:7878 |               | Full URL or hostname with the port to your Sonarr instance                                    |
-| SONARR_API_KEY            | xyz987uvw654rst321    |               | Your API Key (Settings > General > API Key)                                                   |
-| HANDLE_EPISODES           | true                  | true          | Automatically unmonitor episodes.<br>Options: true, false                                     |
-| HANDLE_SERIES             | false                 | false         | Automatically handle entire series. Options: true, false                                      |
-| EXCLUDE_SERIES            | true                  | true          | Add series to import exclusion list. Only applies if REMOVE_MEDIA=true. Options: true, false  |
-| HANDLE_SERIES_ENDED_ONLY  | true                  | true          | Only handle series if they are ended and complete. If false, only series that are complete are handled. Options: true, false |
-| REMOVE_MEDIA              | false                 | false         | Remove media from Radarr/Sonarr instead of just "Unmonitor".<br>Setting this to true only removes the media from the service. Files are left untouched on the file system. Options: true, false |
-| LOG_LEVEL                 | info                  | info          |Logging level. Options: debug, info, warning, error, critical                                  |
+![Screenshot of the Config Page](https://github.com/dlchamp/unmonitorr/blob/add-webui-config/config-page.png?raw=true)  
+&nbsp;  
 
----
+# Setting Up with Docker
 
-### Setting Up with Docker
-
-#### Using `docker run`
+### Using `docker run`
 1. Pull the image: `docker pull ghcr.io/dlchamp/unmonitorr:latest` or you may build it yourself:
     ```bash
     docker build -t unmonitorr:latest .
@@ -64,18 +49,13 @@ command or as part of your docker compose if you'd rather do it that way.
     docker run -d \
         --name unmonitorr \
         -p 8080:8080 \
-        -e RADARR_URI=http://localhost:7878 \
-        -e RADARR_API_KEY=your_radarr_api_key \
-        -e SONARR_URI=http://localhost:8989 \
-        -e SONARR_API_KEY=your_sonarr_api_key \
-        -e HANDLE_EPISODES=true \
-        -e HANDLE_SERIES=true \
-        -e REMOVE_MEDIA=false \
         -e LOG_LEVEL=info \
-        dlchamp/unmonitorr:latest
-    ```
+        -v /host/path/config/:/app/unmonitorr/config-data/
+        ghcr.io/dlchamp/unmonitorr:latest
+    ```  
+&nbsp;  
 
-#### Using `docker-compose`
+### Using `docker-compose`
 1. Create a `docker-compose.yml` file:
     ```yaml
     version: "3.9"
@@ -85,14 +65,9 @@ command or as part of your docker compose if you'd rather do it that way.
         container_name: unmonitorr
         ports:
           - "8080:8080"
+        volumes:
+          - /host/path/config/:/app/unmonitorr/config-data/
         environment:
-          RADARR_URI: "http://localhost:7878"
-          RADARR_API_KEY: "your_radarr_api_key"
-          SONARR_URI: "http://localhost:8989"
-          SONARR_API_KEY: "your_sonarr_api_key"
-          HANDLE_EPISODES: "true"
-          HANDLE_SERIES: "true"
-          REMOVE_MEDIA: "false"
           LOG_LEVEL: "info"
     ```
 
@@ -103,10 +78,19 @@ command or as part of your docker compose if you'd rather do it that way.
 
 3. Verify the server is running:
     ```bash
-    docker logs unmonitorr
-    ```
+    docker logs unmonitorr  
+    ```  
+&nbsp;  
 
----
+### Using Unraid templates
+1. Download and save the template in the user templates directory: `wget -O /boot/config/plugins/dockerMan/templates-user/my-unmonitorr.xml https://raw.githubusercontent.com/dlchamp/unraid-templates/main/unmonitorr.xml`
+2. Go to the "Docker" tab, scroll down and click "Add Container"
+3. At the top: "Select a template" you can click the dropdown, scroll down and click on "unmonitorr"
+4. Make any adjustments for default paths, paths, or logging level.
+6. Apply changes.
+7. Once the container starts, you can right-click and go to the "WebUI" to setup your Sonarr/Radarr API credentials and URLs and adjust the behavior settings.  
+&nbsp;  
+
 
 ## Configuring Webhooks in Radarr and Sonarr
 1. Open Radarr or Sonarr.
@@ -120,20 +104,18 @@ command or as part of your docker compose if you'd rather do it that way.
    - Use the host and port where Unmonitorr is running (e.g., `http://<your-ip>:8080/radarr` or `http://<your-ip>:8080/sonarr`).
 9. Click **Test**.
    - If successful, you will see a green checkmark in Radarr/Sonarr and a test log in Unmonitorr.
-10. Save the webhook connection.
-
----
+10. Save the webhook connection.  
+&nbsp;  
 
 
 ## License
-Unmonitorr is licensed under the MIT License.
+Unmonitorr is licensed under the MIT License.  
+&nbsp;  
 
----
 
 ## Contributing
-Contributions are welcome! Please submit a pull request or open an issue to discuss your ideas.
-
----
+Contributions are welcome! Please submit a pull request or open an issue to discuss your ideas.  
+&nbsp;  
 
 ## Issues
 If you encounter any problems or have questions, please open an issue on the [GitHub repository](https://github.com/dlchamp/unmonitorr/issues).

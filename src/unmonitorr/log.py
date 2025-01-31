@@ -4,7 +4,9 @@ from pathlib import Path
 
 import coloredlogs  # type: ignore
 
-from config import LogConfig
+from unmonitorr.config import LogConfig
+
+__all__ = ("get_logger",)
 
 # setup logging format
 format_string: str = "%(asctime)s | %(module)s | %(levelname)s | %(message)s"
@@ -21,7 +23,7 @@ stdout_handler.setFormatter(formatter)
 logger.addHandler(stdout_handler)
 
 # setup logging file
-log_file = Path("logs/unmonitorr.log")
+log_file = Path("unmonitorr/data/logs/unmonitorr.log")
 log_file.parent.mkdir(exist_ok=True)
 
 # setup logger file handler

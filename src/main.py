@@ -1,19 +1,21 @@
 import asyncio
+import signal
+from typing import Any
 
 from aiohttp import web
 
-import log
-from config import Config
-from server import init_web_application
+from unmonitorr import log, server
+from unmonitorr.config import Config
 
 logger = log.get_logger(__name__)
 
 
 async def main() -> None:
-    Config.validate()
-    logger.debug("Configuration validated successfully")
+    config = Config()
 
-    app = init_web_application()
+    logger.info("Config loaded.")
+
+    app = server.init_web_application(config)
     logger.debug("Initializing web application.")
 
     runner = web.AppRunner(app)
@@ -25,12 +27,24 @@ async def main() -> None:
 
     logger.info("Server starting. Listening on %s:%s", host, port)
 
+    # Use an event to wait for a shutdown signal
+    stop_event = asyncio.Event()
+
+    def handle_shutdown(signum: Any, _: Any) -> None:  # noqa: ANN401
+        logger.info("Received shutdown signal: %s", signal.Signals(signum).name)
+        stop_event.set()
+
+    # Register signal handlers
+    for signame in ("SIGINT", "SIGTERM"):
+        signal.signal(getattr(signal, signame), handle_shutdown)
+
     try:
-        await asyncio.Event().wait()
+        await stop_event.wait()
     except (KeyboardInterrupt, asyncio.CancelledError) as e:
         logger.warning("Server shutdown started: %s", e.__class__.__name__)
-
-    await runner.cleanup()
+    finally:
+        logger.info("Cleaning up resources.")
+        await runner.cleanup()
 
 
 if __name__ == "__main__":

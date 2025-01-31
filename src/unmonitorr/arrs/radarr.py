@@ -1,37 +1,15 @@
-import log
-from types_ import RadarrAPIMovie
+from unmonitorr import log
+from unmonitorr.types_ import RadarrAPIMovie
 
-from . import BaseArrClient, HTTPException
+from .arrbase import BaseArrClient, HTTPException
+
+__all__ = ("RadarrClient",)
 
 logger = log.get_logger(__name__)
 
 
 class RadarrClient(BaseArrClient):
-    """
-    A client for interacting with Radarr's API.
-
-    Parameters
-    ----------
-    proto : str
-        Protocol to use (http or https).
-    host : str
-        Hostname or IP address of the Radarr server.
-    port : int
-        Port number of the Radarr server.
-    api_key : str
-        API key for authenticating with the Radarr server.
-    """
-
-    def __init__(self, uri: str, api_key: str) -> None:
-        super().__init__()
-
-        self.uri = uri
-        self.api_key = api_key
-
-        self.base_url = f"{uri}/api/v3"
-        self.headers = {"X-API-Key": api_key, "Accept": "application/json"}
-
-        logger.debug("Initialized RadarrClient with base_url: %s", self.base_url)
+    """A client for interacting with Radarr's API."""
 
     async def get_movie_by_id(self, id: int) -> RadarrAPIMovie | None:
         """
@@ -96,7 +74,6 @@ class RadarrClient(BaseArrClient):
         """
         url = f"{self.base_url}/movie/{movie.id}"
 
-        logger.info("Unmonitoring movie: %s", movie)
         logger.debug("Movie data to update: %s", movie.model_dump())
         try:
             await self.request(

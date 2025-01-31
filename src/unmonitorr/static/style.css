@@ -1,0 +1,218 @@
+/* https://coolors.co/palette/10002b-240046-3c096c-5a189a-7b2cbf-9d4edd-c77dff-e0aaff*/
+:root {
+    --light-purple:#9D4EDD;
+    --dark-purple:#7B2CBF;
+    --really-dark-purple: #5A189A;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: 'Ubuntu', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(24 24 27);
+}
+
+.container {
+    max-width: 800px;
+    margin: 1rem auto;
+    background: rgb(20 20 23);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+h1 {
+    text-align: center;
+    color: var(--light-purple);
+}
+
+h2 {
+    margin-top: 2rem;
+    color: var(--light-purple);
+    border-bottom: 2px solid var(--light-purple);
+    padding-bottom: 0.5rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+label {
+    font-weight: bold;
+    color: var(--light-purple);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.form-item {
+    padding-bottom: 1em;
+}
+
+.form-item input {
+    padding-top: .5em;
+}
+
+input[type="text"], input[type="password"], select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #f9f9f9;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 0.5rem;
+}
+
+input[type="checkbox"]:checked {
+    accent-color: var(--light-purple);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+.section {
+    margin-bottom: 2rem;
+}
+
+
+.general p {
+    color: rgb(175 175 175);
+    margin-top: -.20rem;
+    margin-left: 1.90rem;
+    margin-bottom: 2rem;
+
+}
+
+/* Toast styles */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: rgb(25 25 27);
+    color: #ffffff;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-size: 0.9rem;
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
+}
+
+.toast-button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.toast-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toast-button.save {
+    background-color: var(--light-purple);
+    color: #ffffff;
+    border: none;
+}
+
+.toast-button.reset {
+    opacity: .85;
+    border-color: transparent;
+}
+
+.toast-button.reset:hover {
+    opacity: 1;
+}
+
+.toast-button.save:hover {
+    background-color: var(--dark-purple);
+}
+
+
+#radarr-test-result, #sonarr-test-result {
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+
+.test-container {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+
+.test-result {
+    margin: 0;
+    color: red;
+    font-size: 1rem;
+}
+
+.button-text {
+    color: white;
+}
+
+.check {
+    color: green;
+}
+
+.close {
+    color: red;
+}
+
+.check, .close, .testing {
+    display: none;
+}
+
+.test-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .6rem 1.5rem;
+    background-color: var(--light-purple);
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 75px;
+    height: 40px;
+}
+
+.test-button:disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.test-button:hover {
+    background-color: var(--dark-purple);
+}

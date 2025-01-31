@@ -2,7 +2,12 @@ from typing import Any
 
 import aiohttp
 
-import log
+from unmonitorr import log
+
+__all__ = (
+    "BaseArrClient",
+    "HTTPException",
+)
 
 logger = log.get_logger(__name__)
 
@@ -25,6 +30,48 @@ class HTTPException(Exception):
 
 
 class BaseArrClient:
+
+    __slots__ = (
+        "api_key",
+        "uri",
+    )
+
+    def __init__(self, uri: str, api_key: str) -> None:
+        self.uri = uri
+        self.api_key = api_key
+
+        if self.disabled:
+            logger.warning(
+                "%s is missing required configuration details -- Disabled.",
+                self.__class__.__name__,
+            )
+            return
+
+        logger.debug(
+            "Initialized %s with base_url: %s",
+            self.__class__.__name__,
+            self.base_url,
+        )
+
+    @property
+    def disabled(self) -> bool:
+        """Return True if uri or api_key is missing."""
+        return not self.uri or not self.api_key
+
+    @property
+    def base_url(self) -> str:
+        """Sonarr and Radarr use `/api/v3` as part of the base URL."""
+        return f"{self.uri}/api/v3"
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Sonarr and Radarr also use the same headers."""
+        return {"X-API-Key": self.api_key, "Accept": "application/json"}
+
+    def update_client_config(self, uri: str, api_key: str) -> None:
+        self.uri = uri
+        self.api_key = api_key
+        self.headers["X-API-Key"] = api_key
 
     async def request(
         self,

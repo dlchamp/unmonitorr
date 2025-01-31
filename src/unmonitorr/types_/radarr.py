@@ -1,5 +1,7 @@
 from .base import SharedBaseModel
 
+__all__ = ("RadarrAPIMovie",)
+
 
 class RadarrAPIMovie(SharedBaseModel):
     title: str
@@ -15,7 +17,10 @@ class RadarrAPIMovie(SharedBaseModel):
         self.monitored = False
 
     def __repr__(self) -> str:
+        return f"<APIMovie, {self.__str__()}>"
+
+    def __str__(self) -> str:
         return (
-            f"<Movie, id={self.id}, title={self.title}, path={self.path}, "
-            f"size={self.size_on_disk}, monitored={self.monitored}>"
+            f"id={self.id}, title={self.title}, path={self.path}, "
+            f"size={self.size_on_disk}, monitored={self.monitored}"
         )

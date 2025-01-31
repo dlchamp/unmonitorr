@@ -1,17 +1,20 @@
 [project]
 name = "unmonitorr"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "Automatically unmonitor or remove media in Radarr and Sonarr."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.11.11",
     "coloredlogs>=15.0.1",
+    "jinja2>=3.1.5",
     "pydantic>=2.10.6",
+    "pyright>=1.1.393",
 ]
 
 [dependency-groups]
 dev = [
+    "aiohttp-devtools>=1.1.2",
     "pre-commit>=4.1.0",
     "pyright>=1.1.392.post0",
     "python-dotenv>=1.0.1",

@@ -1,44 +1,22 @@
-from typing import Any
+from typing import Any, Final
 
-import log
-from config import Config
-from types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
+from unmonitorr import log
+from unmonitorr.types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
 
-from . import BaseArrClient, HTTPException
+from .arrbase import BaseArrClient, HTTPException
+
+__all__ = ("SonarrClient",)
 
 logger = log.get_logger(__name__)
 
 
-COMPLETE_PERCENT = 100
+COMPLETE_PERCENT: Final[int] = 100
 
 
 class SonarrClient(BaseArrClient):
-    """A client for interacting with Sonarr's API.
+    """A client for interacting with Radarr's API."""
 
-    Parameters
-    ----------
-    proto : str
-        Protocol to use (http or https).
-    host : str
-        Hostname or IP address of the Sonarr server.
-    port : int
-        Port number of the Sonarr server.
-    api_key : str
-        API key for authenticating with the Sonarr server.
-    """
-
-    def __init__(self, uri: str, api_key: str) -> None:
-        super().__init__()
-
-        self.uri = uri
-        self.api_key = api_key
-
-        self.base_url = f"{uri}/api/v3"
-        self.headers = {"X-API-Key": api_key, "Accept": "application/json"}
-
-        logger.debug("Initialized SonarrClient with base_url: %s", self.base_url)
-
-    async def delete_series(self, series: WebhookSeries) -> None:
+    async def delete_series(self, series: WebhookSeries, *, exclude: bool = False) -> None:
         """Delete a series from Sonarr.
 
         Parameters
@@ -50,8 +28,8 @@ class SonarrClient(BaseArrClient):
         url = f"{self.base_url}/series/{series.id}"
 
         params: dict[str, Any] = {
-            "deleteFiles": False,
-            "addImportListExclusion": Config.EXCLUDE_SERIES,
+            "deleteFiles": "false",
+            "addImportListExclusion": "true" if exclude else "false",
         }
 
         try:
