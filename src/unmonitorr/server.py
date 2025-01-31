@@ -11,8 +11,10 @@ from unmonitorr.types_ import RadarrWebhookPayload, SonarrWebhookPayload
 
 logger = log.get_logger(__name__)
 
+__all__ = ("init_web_application",)
 
-PayloadTypeT = RadarrWebhookPayload | SonarrWebhookPayload
+
+PayloadT = RadarrWebhookPayload | SonarrWebhookPayload
 
 
 class WebhookHandler:
@@ -87,7 +89,7 @@ class WebhookHandler:
         logger.debug("Finished processing request.")
         return web.Response()
 
-    def validate_payload(self, payload: dict[str, Any]) -> PayloadTypeT | None:
+    def validate_payload(self, payload: dict[str, Any]) -> PayloadT | None:
         """Validate the payload received from the webhook.
 
         Parameters
@@ -101,7 +103,7 @@ class WebhookHandler:
         PayloadType | None
             A validated RadarrPayload, SonarrWebhookPayload, or None if not a valid payload.
         """
-        valid_models: list[type[PayloadTypeT]] = [
+        valid_models: list[type[PayloadT]] = [
             RadarrWebhookPayload,
             SonarrWebhookPayload,
         ]

@@ -1,14 +1,16 @@
-from typing import Any
+from typing import Any, Final
 
 from unmonitorr import log
 from unmonitorr.types_ import SonarrAPISeries, SonarrWebhookPayload, WebhookSeries
 
 from .arrbase import BaseArrClient, HTTPException
 
+__all__ = ("SonarrClient",)
+
 logger = log.get_logger(__name__)
 
 
-COMPLETE_PERCENT = 100
+COMPLETE_PERCENT: Final[int] = 100
 
 
 class SonarrClient(BaseArrClient):

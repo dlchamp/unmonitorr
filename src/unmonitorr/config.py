@@ -10,6 +10,11 @@ else:
 
 import os
 
+__all__ = (
+    "Config",
+    "LogConfig",
+)
+
 CONFIG_PATH: Final[str] = "unmonitorr/config-data"
 os.makedirs(CONFIG_PATH, exist_ok=True)
 

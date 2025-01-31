@@ -3,6 +3,8 @@ from unmonitorr.types_ import RadarrAPIMovie
 
 from .arrbase import BaseArrClient, HTTPException
 
+__all__ = ("RadarrClient",)
+
 logger = log.get_logger(__name__)
 
 

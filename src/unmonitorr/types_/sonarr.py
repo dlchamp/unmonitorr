@@ -1,5 +1,7 @@
 from .base import SharedBaseModel
 
+__all__ = ("SonarrAPISeries",)
+
 
 class SeasonStatistics(SharedBaseModel):
     episode_count: int

@@ -1,5 +1,7 @@
 from .base import SharedBaseModel
 
+__all__ = ("RadarrAPIMovie",)
+
 
 class RadarrAPIMovie(SharedBaseModel):
     title: str

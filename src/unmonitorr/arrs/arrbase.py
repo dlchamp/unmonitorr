@@ -4,6 +4,11 @@ import aiohttp
 
 from unmonitorr import log
 
+__all__ = (
+    "BaseArrClient",
+    "HTTPException",
+)
+
 logger = log.get_logger(__name__)
 
 

@@ -6,6 +6,8 @@ import coloredlogs  # type: ignore
 
 from unmonitorr.config import LogConfig
 
+__all__ = ("get_logger",)
+
 # setup logging format
 format_string: str = "%(asctime)s | %(module)s | %(levelname)s | %(message)s"
 formatter: logging.Formatter = logging.Formatter(format_string)

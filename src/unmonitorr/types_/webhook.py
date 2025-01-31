@@ -1,5 +1,13 @@
 from .base import SharedBaseModel
 
+__all__ = (
+    "RadarrWebhookPayload",
+    "SonarrWebhookPayload",
+    "WebhookEpisode",
+    "WebhookMovie",
+    "WebhookSeries",
+)
+
 
 class WebhookMovie(SharedBaseModel):
     id: int

@@ -1,5 +1,10 @@
 from .base import SharedBaseModel
 
+__all__ = (
+    "Episode",
+    "Series",
+)
+
 
 class SeriesStatistics(SharedBaseModel):
     season_count: int
